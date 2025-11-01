@@ -1,8 +1,13 @@
 # VN PCfix
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/assets/logo-vnpcfix.svg" alt="VN PCfix logo" width="220" />
+</p>
+
 [![PowerShell 5.1+](https://img.shields.io/badge/PowerShell-5.1%2B-blue)](https://learn.microsoft.com/powershell/scripting/overview)
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%2F11-blue)](https://www.microsoft.com/windows)
 [![Run from GitHub](https://img.shields.io/badge/Run-irm%20%7C%20iex-lightgrey)](https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1)
+[![Support on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C3RZTLR)
 
 Copy & Run now:
 
@@ -53,7 +58,6 @@ powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -HighContrast -BasicASCII
 ## Dependencies
 - PowerShell `5.1` or `7.x`
 - Windows 10/11 (for DISM/Defender modules)
-- Pester (tests) — PowerShell 5.1 ships Pester 3.x by default; tests target basic DSL
 
 ## Configuration
 Optional JSON: `config\vnpcfix.json`
@@ -88,7 +92,6 @@ src/                      # PowerShell module and components
   VNPCfix.Diagnostics.psm1# Diagnostics panels
   VNPCfix.Repairs.psm1    # Repairs (SFC, DISM, CHKDSK)
 assets/logo-vnpcfix.svg   # Brand asset
-tests/                    # Pester tests (unit)
 ```
 
 ## Compatibility
