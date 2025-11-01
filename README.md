@@ -1,8 +1,6 @@
 # VN PCfix
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/assets/logo-vnpcfix.svg" alt="VN PCfix logo" width="220" />
-</p>
+
 
 [![PowerShell 5.1+](https://img.shields.io/badge/PowerShell-5.1%2B-blue)](https://learn.microsoft.com/powershell/scripting/overview)
 [![Windows 10/11](https://img.shields.io/badge/Windows-10%2F11-blue)](https://www.microsoft.com/windows)
@@ -91,7 +89,6 @@ src/                      # PowerShell module and components
   VNPCfix.Security.psm1   # Admin checks and elevation
   VNPCfix.Diagnostics.psm1# Diagnostics panels
   VNPCfix.Repairs.psm1    # Repairs (SFC, DISM, CHKDSK)
-assets/logo-vnpcfix.svg   # Brand asset
 ```
 
 ## Compatibility
