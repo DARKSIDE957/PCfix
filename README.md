@@ -22,24 +22,7 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
 - Logging to `%LocalAppData%\PCfix\pcfix-<timestamp>.log`
 - Accessibility and appearance options: high-contrast, no-color, ASCII icons, large text
 
-## How to Run (PowerShell)
-```powershell
-# Windows PowerShell 5.1
-powershell -ExecutionPolicy Bypass -File .\PCfix.ps1
-
-# PowerShell 7+
-pwsh -NoProfile -File .\PCfix.ps1
-
-# Dry run (no changes)
-powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -WhatIf
-
-# Accessibility examples
-powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -HighContrast -BasicASCII
-powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -NoColor -LargeText
-
-# Avoid auto-elevation (preview repairs in standard session)
-powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -NoElevate
-```
+ 
 
 
 ### Parameters
