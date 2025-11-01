@@ -7,7 +7,7 @@
 [![Run from GitHub](https://img.shields.io/badge/Run-irm%20%7C%20iex-lightgrey)](https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1)
 [![Support on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C3RZTLR)
 
-Copy & Run now:
+Copy & Run now (run in PowerShell as Administrator):
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1')
@@ -40,21 +40,6 @@ powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -NoColor -LargeText
 # Avoid auto-elevation (preview repairs in standard session)
 powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -NoElevate
 ```
-
-## Quick Run (GitHub)
-- One‑liner (runs from GitHub):
-  - `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1')`
-- Alternative:
-  - `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iwr -UseBasicParsing 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1' | iex`
-
-- With flags (download then run):
-  - `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12`
-  - `$tmp = Join-Path $env:TEMP 'PCfix.ps1'`
-  - `iwr -UseBasicParsing 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1' | Set-Content -Path $tmp`
-  - `powershell -NoProfile -ExecutionPolicy Bypass -File $tmp -WhatIf -NoElevate -HighContrast -BasicASCII`
-
-- Pin to version:
-  - `iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/<TAG_OR_SHA>/PCfix.ps1')`
 
 
 ### Parameters
