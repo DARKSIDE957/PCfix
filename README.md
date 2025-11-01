@@ -10,7 +10,7 @@
 Copy & Run now (run in PowerShell as Administrator):
 
 ```powershell
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1')
+iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1')
 ```
 
 VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair. It provides a clean console UI with theming, diagnostics panels, and safe repair actions with comprehensive logging and `-WhatIf` dry-run support.
