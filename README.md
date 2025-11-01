@@ -25,13 +25,6 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
  
 
 
-### Parameters
-- `-NoElevate`: Do not auto-elevate; restrict repairs in non-admin sessions
-- `-HighContrast`: Force high-contrast colors
-- `-NoColor`: Disable all color output
-- `-BasicASCII`: Use ASCII symbols to avoid encoding issues
-- `-LargeText`: Add spacing for readability
-- `-WhatIf`: Dry-run actions; supported for all repairs
 
 ## Dependencies
 - PowerShell `5.1` or `7.x`
