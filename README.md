@@ -1,5 +1,15 @@
 # VN PCfix
 
+[![PowerShell 5.1+](https://img.shields.io/badge/PowerShell-5.1%2B-blue)](https://learn.microsoft.com/powershell/scripting/overview)
+[![Windows 10/11](https://img.shields.io/badge/Windows-10%2F11-blue)](https://www.microsoft.com/windows)
+[![Run from GitHub](https://img.shields.io/badge/Run-irm%20%7C%20iex-lightgrey)](https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1)
+
+Copy & Run now:
+
+```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1')
+```
+
 VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair. It provides a clean console UI with theming, diagnostics panels, and safe repair actions with comprehensive logging and `-WhatIf` dry-run support.
 
 ## Purpose & Functionality
