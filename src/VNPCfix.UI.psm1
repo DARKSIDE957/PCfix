@@ -42,6 +42,15 @@ function Initialize-Theme {
     $script:Colors.Warning = 'White'
     $script:Colors.Error   = 'White'
   }
+
+  if ($script:UI.NoColor) {
+    $script:Colors.Accent  = 'Gray'
+    $script:Colors.Accent2 = 'Gray'
+    $script:Colors.Info    = 'Gray'
+    $script:Colors.Success = 'Gray'
+    $script:Colors.Warning = 'Gray'
+    $script:Colors.Error   = 'Gray'
+  }
 }
 
 function Write-ColorHost {
@@ -53,6 +62,18 @@ function Write-ColorHost {
 }
 
 function Get-ConsoleWidth { try { $Host.UI.RawUI.WindowSize.Width } catch { 80 } }
+function Get-ConsoleHeight { try { $Host.UI.RawUI.WindowSize.Height } catch { 25 } }
+function Wrap-Text([string]$Text,[int]$Width=$null) {
+  if (-not $Width) { $Width = Get-ConsoleWidth }
+  $max = [Math]::Max(10, $Width - 2)
+  $words = $Text -split '\s+'
+  $lines = @('')
+  foreach ($w in $words) {
+    if (($lines[-1].Length + $w.Length + 1) -gt $max) { $lines += $w }
+    else { if ($lines[-1].Length -eq 0) { $lines[-1] = $w } else { $lines[-1] += (' ' + $w) } }
+  }
+  return $lines
+}
 function Center-Text([string]$Text) {
   $width = Get-ConsoleWidth
   $pad = [Math]::Max(0, [Math]::Floor(($width - $Text.Length) / 2))
@@ -89,7 +110,8 @@ function Write-HighlightedLine([string]$Text) {
 
 function Write-Panel([string]$Title,[string[]]$Lines) {
   Write-Title $Title
-  foreach ($ln in $Lines) { Write-HighlightedLine $ln }
+  $width = Get-ConsoleWidth
+  foreach ($ln in $Lines) { foreach ($w in (Wrap-Text $ln $width)) { Write-HighlightedLine $w } }
   Write-Separator
 }
 
