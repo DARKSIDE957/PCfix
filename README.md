@@ -16,6 +16,22 @@ powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -WhatIf
 powershell -ExecutionPolicy Bypass -File .\PCfix.ps1 -HighContrast -BasicASCII
 ```
 
+## Quick Run (GitHub)
+- One‑liner (runs from GitHub):
+  - `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1')`
+- Alternative:
+  - `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; iwr -UseBasicParsing 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1' | iex`
+
+- With flags (download then run):
+  - `[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12`
+  - `$tmp = Join-Path $env:TEMP 'PCfix.ps1'`
+  - `iwr -UseBasicParsing 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/main/PCfix.ps1' | Set-Content -Path $tmp`
+  - `powershell -NoProfile -ExecutionPolicy Bypass -File $tmp -WhatIf -NoElevate -HighContrast -BasicASCII`
+
+- Pin to version:
+  - `iex (irm 'https://raw.githubusercontent.com/DARKSIDE957/PCfix/<TAG_OR_SHA>/PCfix.ps1')`
+
+
 ### Parameters
 - `-NoElevate`: Do not auto-elevate; restrict repairs in non-admin sessions
 - `-HighContrast`: Force high-contrast colors
