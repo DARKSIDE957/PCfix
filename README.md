@@ -18,7 +18,9 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
 ## Purpose & Functionality
 - Interactive console with main and repair menus
 - System diagnostics: OS, CPU, memory, disk info, recent critical events
-- Repair actions: `SFC`, `DISM`, `CHKDSK` scan/fix
+- Repair actions: `SFC`, `DISM RestoreHealth`, `CHKDSK` scan/fix
+- Additional repairs: Winsock/IP stack reset, Windows Update components reset,
+  DISM StartComponentCleanup (WinSxS), clear TEMP folders
 - Logging to `%LocalAppData%\PCfix\pcfix-<timestamp>.log`
 - Accessibility and appearance options: high-contrast, no-color, ASCII icons, large text
 

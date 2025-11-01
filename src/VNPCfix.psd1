@@ -16,7 +16,11 @@
     'Invoke-VNPCfixSfcRepair',
     'Invoke-VNPCfixDismRepair',
     'Invoke-VNPCfixChkdskScan',
-    'Invoke-VNPCfixChkdskFix'
+    'Invoke-VNPCfixChkdskFix',
+    'Invoke-VNPCfixWinsockReset',
+    'Invoke-VNPCfixWindowsUpdateReset',
+    'Invoke-VNPCfixStartComponentCleanup',
+    'Invoke-VNPCfixClearTempFiles'
   )
   NestedModules     = @(
     'VNPCfix.Core.psm1',

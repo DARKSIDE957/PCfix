@@ -61,6 +61,10 @@ function Start-VNPCfix {
         Format-MenuItem 2 'Run DISM RestoreHealth'
         Format-MenuItem 3 'Run CHKDSK scan'
         Format-MenuItem 4 'Run CHKDSK fix'
+        Format-MenuItem 5 'Reset Winsock & IP stack'
+        Format-MenuItem 6 'Reset Windows Update components'
+        Format-MenuItem 7 'DISM StartComponentCleanup (WinSxS)'
+        Format-MenuItem 8 'Clear TEMP folders'
         Format-MenuItem 0 'Back'
         $r = Read-Host 'Select a repair'
         switch ($r) {
@@ -68,6 +72,10 @@ function Start-VNPCfix {
           '2' { try { Invoke-VNPCfixDismRepair -WhatIf:$whatIfSwitch } catch {} }
           '3' { try { Invoke-VNPCfixChkdskScan -WhatIf:$whatIfSwitch } catch {} }
           '4' { try { Invoke-VNPCfixChkdskFix -WhatIf:$whatIfSwitch } catch {} }
+          '5' { try { Invoke-VNPCfixWinsockReset -WhatIf:$whatIfSwitch } catch {} }
+          '6' { try { Invoke-VNPCfixWindowsUpdateReset -WhatIf:$whatIfSwitch } catch {} }
+          '7' { try { Invoke-VNPCfixStartComponentCleanup -WhatIf:$whatIfSwitch } catch {} }
+          '8' { try { Invoke-VNPCfixClearTempFiles -WhatIf:$whatIfSwitch } catch {} }
           default { Write-Status Info 'Returning to main menu.' }
         }
       }
@@ -77,4 +85,4 @@ function Start-VNPCfix {
   }
 }
 
-Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix
+Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles
