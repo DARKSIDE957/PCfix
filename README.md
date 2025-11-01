@@ -37,26 +37,6 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
 - PowerShell `5.1` or `7.x`
 - Windows 10/11 (for DISM/Defender modules)
 
-## Configuration
-Optional JSON: `config\vnpcfix.json`
-```json
-{
-  "UI": {
-    "HighContrast": false,
-    "NoColor": false,
-    "BasicASCII": true,
-    "LargeText": false
-  }
-}
-```
-Applied on startup if present; command-line flags override config.
-
-## Security Best Practices
-- Least-privilege by default; repairs require Admin and prompt elevation
-- `SupportsShouldProcess` on repair functions for `-WhatIf` and confirmation flows
-- Input validation and guarded file system operations
-- No use of `Invoke-Expression`; external commands invoked explicitly
-- Logs stored under `%LocalAppData%\PCfix` (per-user)
 
 ## Project Structure
 ```
