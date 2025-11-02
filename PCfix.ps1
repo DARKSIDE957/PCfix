@@ -56,8 +56,8 @@ function Test-IsAdmin {
 
 $Script:IsAdmin = Test-IsAdmin
 $Script:SessionStamp = (Get-Date).ToString('yyyyMMdd-HHmmss')
-$Script:LogDir = Join-Path $env:TEMP 'PCfix'
-if (-not (Test-Path $Script:LogDir)) { New-Item -ItemType Directory -Path $Script:LogDir | Out-Null }
+$Script:LogDir = Join-Path $env:LOCALAPPDATA 'PCfix'
+if (-not (Test-Path -LiteralPath $Script:LogDir)) { New-Item -ItemType Directory -Path $Script:LogDir -Force | Out-Null }
 $Script:LogFile = Join-Path $Script:LogDir "pcfix-$Script:SessionStamp.log"
 
 # UI helpers
@@ -177,9 +177,19 @@ if (-not $Script:IsAdmin -and -not $NoElevate) {
 
 function Write-Log {
   param([string]$Message, [string]$Level = 'INFO')
-  $ts = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
-  $line = "$ts [$Level] $Message"
-  Add-Content -Path $Script:LogFile -Value $line
+  try {
+    if (-not (Test-Path -LiteralPath $Script:LogDir)) {
+      New-Item -ItemType Directory -Path $Script:LogDir -Force | Out-Null
+    }
+    if (-not $Script:LogFile) {
+      $Script:LogFile = Join-Path $Script:LogDir "pcfix-$Script:SessionStamp.log"
+    }
+    $ts = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
+    $line = "$ts [$Level] $Message"
+    Add-Content -LiteralPath $Script:LogFile -Value $line
+  } catch {
+    Write-Host "Log write failed: $($_.Exception.Message)" -ForegroundColor Yellow
+  }
 }
 
 function Show-Header {
