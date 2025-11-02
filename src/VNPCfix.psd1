@@ -20,7 +20,10 @@
     'Invoke-VNPCfixWinsockReset',
     'Invoke-VNPCfixWindowsUpdateReset',
     'Invoke-VNPCfixStartComponentCleanup',
-    'Invoke-VNPCfixClearTempFiles'
+    'Invoke-VNPCfixClearTempFiles',
+    'Invoke-VNPCfixRegistryRepair',
+    'Invoke-VNPCfixCreateRestorePoint',
+    'Invoke-VNPCfixWindowsUpdateCacheRestore'
   )
   NestedModules     = @(
     'VNPCfix.Core.psm1',

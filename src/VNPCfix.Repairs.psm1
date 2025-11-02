@@ -152,4 +152,61 @@ function Invoke-VNPCfixClearTempFiles {
   }
 }
 
-Export-ModuleMember -Function Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles
+function Invoke-VNPCfixRegistryRepair {
+  [CmdletBinding(SupportsShouldProcess)]
+  param()
+  try {
+    if ($PSCmdlet.ShouldProcess('Windows Installer','Re-register MSI service and backup registry')) {
+      $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+      $backupPath = Join-Path $env:LOCALAPPDATA (Join-Path 'PCfix' ("registry-backup-Installer-" + $stamp + '.reg'))
+      Write-Status Info 'Backing up Windows Installer registry key...'
+      try { & reg.exe export 'HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer' "$backupPath" /y | Out-Null; Write-Log -Message "Exported Installer key to $backupPath" -Level INFO } catch { Write-Log -Message "Registry export failed: $($_.Exception.Message)" -Level WARN }
+      Show-ProgressLoop 'Windows Installer re-register' {
+        msiexec.exe /unregister | Out-Null
+        msiexec.exe /regserver  | Out-Null
+      }
+      Write-Status Success 'Windows Installer re-registered.'
+      Write-Log -Message 'Windows Installer re-registered' -Level INFO
+    }
+  } catch {
+    Write-Status Error "Registry repair failed: $($_.Exception.Message)"
+    Write-Log -Message "Registry repair failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+function Invoke-VNPCfixCreateRestorePoint {
+  [CmdletBinding(SupportsShouldProcess)]
+  param([string]$Description = ("PCfix Restore Point " + (Get-Date -Format 'yyyyMMdd-HHmmss')))
+  try {
+    if ($PSCmdlet.ShouldProcess('System Restore','Create restore point')) {
+      Write-Status Info "Creating system restore point: $Description"
+      Checkpoint-Computer -Description $Description -RestorePointType 'MODIFY_SETTINGS'
+      Write-Status Success 'Restore point created.'
+      Write-Log -Message "Restore point created: $Description" -Level INFO
+    }
+  } catch {
+    Write-Status Error 'Restore point creation failed or is disabled.'
+    Write-Log -Message "Restore point failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+function Invoke-VNPCfixWindowsUpdateCacheRestore {
+  [CmdletBinding(SupportsShouldProcess)]
+  param()
+  try {
+    if ($PSCmdlet.ShouldProcess('Windows Update cache','Restore renamed folder')) {
+      $bak = Get-ChildItem (Join-Path $env:SystemRoot '.') -Filter 'SoftwareDistribution.old-*' -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+      if ($bak) {
+        try { Rename-Item -LiteralPath $bak.FullName -NewName 'SoftwareDistribution' -Force; Write-Status Success 'Windows Update cache restored.'; Write-Log -Message "Restored WU cache from $($bak.Name)" -Level INFO } catch { Write-Log -Message "WU cache restore failed: $($_.Exception.Message)" -Level ERROR; Write-Status Error 'Windows Update cache restore failed.' }
+      } else { Write-Status Warning 'No Windows Update cache backup found.' }
+    }
+  } catch {
+    Write-Status Error "WU cache restore failed: $($_.Exception.Message)"
+    Write-Log -Message "WU cache restore failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+Export-ModuleMember -Function Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore

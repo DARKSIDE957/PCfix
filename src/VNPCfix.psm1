@@ -65,6 +65,9 @@ function Start-VNPCfix {
         Format-MenuItem 6 'Reset Windows Update components'
         Format-MenuItem 7 'DISM StartComponentCleanup (WinSxS)'
         Format-MenuItem 8 'Clear TEMP folders'
+        Format-MenuItem 9 'Registry repair (Windows Installer re-register)'
+        Format-MenuItem 10 'Create a system restore point'
+        Format-MenuItem 11 'Rollback Windows Update cache rename'
         Format-MenuItem 0 'Back'
         $r = Read-Host 'Select a repair'
         switch ($r) {
@@ -76,6 +79,9 @@ function Start-VNPCfix {
           '6' { try { Invoke-VNPCfixWindowsUpdateReset -WhatIf:$whatIfSwitch } catch {} }
           '7' { try { Invoke-VNPCfixStartComponentCleanup -WhatIf:$whatIfSwitch } catch {} }
           '8' { try { Invoke-VNPCfixClearTempFiles -WhatIf:$whatIfSwitch } catch {} }
+          '9' { try { Invoke-VNPCfixRegistryRepair -WhatIf:$whatIfSwitch } catch {} }
+          '10' { try { Invoke-VNPCfixCreateRestorePoint -WhatIf:$whatIfSwitch } catch {} }
+          '11' { try { Invoke-VNPCfixWindowsUpdateCacheRestore -WhatIf:$whatIfSwitch } catch {} }
           default { Write-Status Info 'Returning to main menu.' }
         }
       }
@@ -85,4 +91,4 @@ function Start-VNPCfix {
   }
 }
 
-Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles
+Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore
