@@ -395,7 +395,7 @@ function Invoke-PCfixChkdskScan {
 function Invoke-PCfixChkdskFix {
   [CmdletBinding(SupportsShouldProcess=$true)] param([string]$Drive='C:')
   Write-Host 'Warning: /f may schedule repair at next reboot.' -ForegroundColor Yellow
-  $ok = Read-Host "Proceed to schedule chkdsk /f on $Drive? (Y/N)"
+  $ok = Read-Host ('Proceed to schedule chkdsk /f on {0}? (Y/N)' -f $Drive)
   if ($ok -notmatch '^(y|yes)$') { Write-Host 'Cancelled.' -ForegroundColor DarkYellow; return }
   if ($PSCmdlet.ShouldProcess($Drive,'Run chkdsk /f')) {
     Write-Log "Chkdsk /f requested on $Drive"
