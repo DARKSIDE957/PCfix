@@ -39,8 +39,8 @@ function Invoke-VNPCfixDismRepair {
 function Invoke-VNPCfixChkdskScan {
   [CmdletBinding(SupportsShouldProcess)] param([string]$Drive='C:')
   try {
-    if ($PSCmdlet.ShouldProcess("CHKDSK scan on $Drive",'chkdsk')) {
-      Show-ProgressLoop "CHKDSK Scan ($Drive)" { chkdsk $Drive }
+    if ($PSCmdlet.ShouldProcess("CHKDSK scan on $Drive",'chkdsk /scan')) {
+      Show-ProgressLoop "CHKDSK Scan ($Drive)" { chkdsk $Drive /scan }
       Write-Status Success 'CHKDSK scan completed.'
       Write-Log -Message "CHKDSK scan on $Drive completed" -Level INFO
     }

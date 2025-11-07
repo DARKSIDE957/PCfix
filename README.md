@@ -18,6 +18,9 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
 ## Purpose & Functionality
 - Interactive console with main and repair menus
 - System diagnostics: OS, CPU, memory, disk info, recent critical events
+- Enhanced diagnostics: service health (WUA, BITS, CryptSvc, MSI),
+  network reachability checks (DNS/HTTPS), storage health overview, optional
+  `DISM /CheckHealth` in full mode
 - Repair actions: `SFC`, `DISM RestoreHealth`, `CHKDSK` scan/fix
 - Additional repairs: Winsock/IP stack reset, Windows Update components reset,
   DISM StartComponentCleanup (WinSxS), clear TEMP folders
@@ -44,6 +47,40 @@ src/                      # PowerShell module and components
   VNPCfix.Security.psm1   # Admin checks and elevation
   VNPCfix.Diagnostics.psm1# Diagnostics panels
   VNPCfix.Repairs.psm1    # Repairs (SFC, DISM, CHKDSK)
+```
+
+## New Additions & Specifications
+- Functionality
+  - `Invoke-VNPCfixDiagnostics [-FullChecks]` outputs panels and returns a structured summary object with keys: `SystemInfo`, `Services`, `Network`, `Storage`, `Events`, and optional `DismCheckHealth`.
+  - Quick mode (default) avoids long-running checks; Full mode adds `DISM /CheckHealth`.
+- Design Guidelines
+  - Use existing UI helpers (`Write-Panel`, `Write-Title`, `Write-Separator`, `Write-Status`) for consistent console output.
+  - Keep actions idempotent and non-destructive in diagnostics.
+- Technical Constraints
+  - PowerShell 5.1+, Windows 10/11; no external dependencies.
+  - Prefer CIM/WMI (`Get-CimInstance`) fallbacks when modern cmdlets are unavailable.
+  - Repairs support `-WhatIf` via `SupportsShouldProcess`.
+- Performance Expectations
+  - Quick diagnostics complete under ~10s on typical systems.
+  - Full diagnostics (with DISM check) under ~2 minutes depending on system.
+- Testing Requirements
+  - Pester tests verify module loading, exports, and that diagnostics returns a summary object without running heavy operations.
+  - Manual validation: run `Invoke-VNPCfixDiagnostics -FullChecks` and review panels and log entries.
+
+## Usage Examples
+```powershell
+# Start interactive UI (recommended)
+Start-VNPCfix
+
+# Quick diagnostics (non-destructive)
+Invoke-VNPCfixDiagnostics
+
+# Full diagnostics including DISM CheckHealth
+Invoke-VNPCfixDiagnostics -FullChecks
+
+# Run repairs with dry-run preview
+Invoke-VNPCfixDismRepair -WhatIf
+Invoke-VNPCfixSfcRepair -WhatIf
 ```
 
 ## Compatibility
