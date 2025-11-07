@@ -24,6 +24,8 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
 - Repair actions: `SFC`, `DISM RestoreHealth`, `CHKDSK` scan/fix
 - Additional repairs: Winsock/IP stack reset, Windows Update components reset,
   DISM StartComponentCleanup (WinSxS), clear TEMP folders
+  New: DNS flush & IP renew, reset Windows Firewall, reset Microsoft Store cache,
+  rebuild Windows Search index, resync Windows Time service
 - Logging to `%LocalAppData%\PCfix\pcfix-<timestamp>.log`
 - Accessibility and appearance options: high-contrast, no-color, ASCII icons, large text
 
@@ -81,6 +83,11 @@ Invoke-VNPCfixDiagnostics -FullChecks
 # Run repairs with dry-run preview
 Invoke-VNPCfixDismRepair -WhatIf
 Invoke-VNPCfixSfcRepair -WhatIf
+Invoke-VNPCfixFlushDnsAndRenewIp -WhatIf
+Invoke-VNPCfixResetFirewall -WhatIf
+Invoke-VNPCfixResetWindowsStoreCache -WhatIf
+Invoke-VNPCfixRebuildSearchIndex -WhatIf
+Invoke-VNPCfixResyncTimeService -WhatIf
 ```
 
 ## Compatibility

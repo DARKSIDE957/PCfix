@@ -68,6 +68,11 @@ function Start-VNPCfix {
         Format-MenuItem 9 'Registry repair (Windows Installer re-register)'
         Format-MenuItem 10 'Create a system restore point'
         Format-MenuItem 11 'Rollback Windows Update cache rename'
+        Format-MenuItem 12 'Flush DNS and renew IP'
+        Format-MenuItem 13 'Reset Windows Firewall to default'
+        Format-MenuItem 14 'Reset Microsoft Store cache'
+        Format-MenuItem 15 'Rebuild Windows Search index'
+        Format-MenuItem 16 'Resync Windows Time service'
         Format-MenuItem 0 'Back'
         $r = Read-Host 'Select a repair'
         switch ($r) {
@@ -82,6 +87,11 @@ function Start-VNPCfix {
           '9' { try { Invoke-VNPCfixRegistryRepair -WhatIf:$whatIfSwitch } catch {} }
           '10' { try { Invoke-VNPCfixCreateRestorePoint -WhatIf:$whatIfSwitch } catch {} }
           '11' { try { Invoke-VNPCfixWindowsUpdateCacheRestore -WhatIf:$whatIfSwitch } catch {} }
+          '12' { try { Invoke-VNPCfixFlushDnsAndRenewIp -WhatIf:$whatIfSwitch } catch {} }
+          '13' { try { Invoke-VNPCfixResetFirewall -WhatIf:$whatIfSwitch } catch {} }
+          '14' { try { Invoke-VNPCfixResetWindowsStoreCache -WhatIf:$whatIfSwitch } catch {} }
+          '15' { try { Invoke-VNPCfixRebuildSearchIndex -WhatIf:$whatIfSwitch } catch {} }
+          '16' { try { Invoke-VNPCfixResyncTimeService -WhatIf:$whatIfSwitch } catch {} }
           default { Write-Status Info 'Returning to main menu.' }
         }
       }
@@ -91,4 +101,4 @@ function Start-VNPCfix {
   }
 }
 
-Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore
+Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore, Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService

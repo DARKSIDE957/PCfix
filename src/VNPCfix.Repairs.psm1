@@ -210,3 +210,94 @@ function Invoke-VNPCfixWindowsUpdateCacheRestore {
 }
 
 Export-ModuleMember -Function Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore
+function Invoke-VNPCfixFlushDnsAndRenewIp {
+  [CmdletBinding(SupportsShouldProcess)] param()
+  try {
+    if ($PSCmdlet.ShouldProcess('IP Configuration','ipconfig /flushdns; ipconfig /release; ipconfig /renew')) {
+      Show-ProgressLoop 'Network IP Refresh' {
+        ipconfig /flushdns | Out-Null
+        ipconfig /release  | Out-Null
+        ipconfig /renew    | Out-Null
+      }
+      Write-Status Success 'DNS cache flushed and IP renewed.'
+      Write-Log -Message 'Flushed DNS and renewed IP configuration' -Level INFO
+    }
+  } catch {
+    Write-Status Error "IP refresh failed: $($_.Exception.Message)"
+    Write-Log -Message "IP refresh failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+function Invoke-VNPCfixResetFirewall {
+  [CmdletBinding(SupportsShouldProcess,ConfirmImpact='High')] param()
+  try {
+    if ($PSCmdlet.ShouldProcess('Windows Firewall','netsh advfirewall reset')) {
+      Show-ProgressLoop 'Reset Windows Firewall' { netsh advfirewall reset }
+      Write-Status Success 'Windows Firewall reset to defaults.'
+      Write-Log -Message 'Windows Firewall reset' -Level INFO
+    }
+  } catch {
+    Write-Status Error "Firewall reset failed: $($_.Exception.Message)"
+    Write-Log -Message "Firewall reset failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+function Invoke-VNPCfixResetWindowsStoreCache {
+  [CmdletBinding(SupportsShouldProcess)] param()
+  try {
+    if ($PSCmdlet.ShouldProcess('Microsoft Store','wsreset.exe')) {
+      Show-ProgressLoop 'Reset Microsoft Store Cache' { wsreset.exe }
+      Write-Status Success 'Microsoft Store cache reset.'
+      Write-Log -Message 'WSReset executed' -Level INFO
+    }
+  } catch {
+    Write-Status Error "WSReset failed: $($_.Exception.Message)"
+    Write-Log -Message "WSReset failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+function Invoke-VNPCfixRebuildSearchIndex {
+  [CmdletBinding(SupportsShouldProcess,ConfirmImpact='High')] param()
+  try {
+    if ($PSCmdlet.ShouldProcess('Windows Search Index','Stop WSearch; rename index data; start WSearch')) {
+      $svc = 'WSearch'
+      $idxDir = 'C:\ProgramData\Microsoft\Search\Data\Applications\Windows'
+      $stamp = (Get-Date -Format 'yyyyMMdd-HHmmss')
+      try { Stop-Service -Name $svc -Force -ErrorAction SilentlyContinue } catch {}
+      if (Test-Path -LiteralPath $idxDir) {
+        $newName = "Windows.old-$stamp"
+        try { Rename-Item -LiteralPath $idxDir -NewName $newName -ErrorAction SilentlyContinue } catch {}
+      }
+      try { Start-Service -Name $svc -ErrorAction SilentlyContinue } catch {}
+      Write-Status Success 'Search index scheduled to rebuild.'
+      Write-Log -Message 'Search index folder renamed; service restarted' -Level INFO
+    }
+  } catch {
+    Write-Status Error "Search index rebuild failed: $($_.Exception.Message)"
+    Write-Log -Message "Search index rebuild failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+function Invoke-VNPCfixResyncTimeService {
+  [CmdletBinding(SupportsShouldProcess)] param()
+  try {
+    if ($PSCmdlet.ShouldProcess('Windows Time','w32tm /resync; restart w32time')) {
+      Show-ProgressLoop 'Time Synchronization' {
+        try { w32tm /resync | Out-Null } catch {}
+        try { Restart-Service -Name w32time -ErrorAction SilentlyContinue } catch {}
+      }
+      Write-Status Success 'Time service resynchronized.'
+      Write-Log -Message 'Time service resync performed' -Level INFO
+    }
+  } catch {
+    Write-Status Error "Time sync failed: $($_.Exception.Message)"
+    Write-Log -Message "Time sync failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+Export-ModuleMember -Function Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService

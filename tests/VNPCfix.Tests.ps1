@@ -11,7 +11,9 @@ Describe 'VNPCfix Module' {
   }
 
   It 'exports key public commands' {
-    $cmds = 'Start-VNPCfix','Set-VNPCfixOptions','Invoke-VNPCfixDiagnostics','Invoke-VNPCfixSfcRepair','Invoke-VNPCfixDismRepair'
+    $cmds = 'Start-VNPCfix','Set-VNPCfixOptions','Invoke-VNPCfixDiagnostics','Invoke-VNPCfixSfcRepair','Invoke-VNPCfixDismRepair',
+            'Invoke-VNPCfixFlushDnsAndRenewIp','Invoke-VNPCfixResetFirewall','Invoke-VNPCfixResetWindowsStoreCache',
+            'Invoke-VNPCfixRebuildSearchIndex','Invoke-VNPCfixResyncTimeService'
     foreach ($c in $cmds) { (Get-Command -Name $c -ErrorAction SilentlyContinue) | Should -Not -BeNullOrEmpty }
   }
 
