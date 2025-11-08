@@ -92,10 +92,11 @@ function Start-VNPCfix {
           '14' { try { Invoke-VNPCfixResetWindowsStoreCache -WhatIf:$whatIfSwitch } catch {} }
           '15' { try { Invoke-VNPCfixRebuildSearchIndex -WhatIf:$whatIfSwitch } catch {} }
           '16' { try { Invoke-VNPCfixResyncTimeService -WhatIf:$whatIfSwitch } catch {} }
-          default { Write-Status Info 'Returning to main menu.' }
+          '0'  { Write-Status Info 'Returning to main menu.' }
+          default { Write-Status Warning 'Invalid selection.' }
         }
       }
-      '0' { Write-Status Info 'Goodbye.'; break }
+      '0' { Write-Status Info 'Goodbye.'; return }
       default { Write-Status Warning 'Invalid selection.' }
     }
   }
