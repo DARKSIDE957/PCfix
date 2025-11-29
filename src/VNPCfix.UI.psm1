@@ -80,11 +80,25 @@ function Center-Text([string]$Text) {
   return (' ' * $pad) + $Text
 }
 
-function Write-Separator { Write-ColorHost ('-' * (Get-ConsoleWidth)) $script:Colors.Info }
+function Get-BoxChars {
+  if ($script:UI.BasicASCII) { return @{ H='-'; V='|'; TL='+'; TR='+'; BL='+'; BR='+' } }
+  return @{ H=[string]([char]0x2500); V=[string]([char]0x2502); TL=[string]([char]0x250C); TR=[string]([char]0x2510); BL=[string]([char]0x2514); BR=[string]([char]0x2518) }
+}
+function Write-Separator {
+  $b = Get-BoxChars
+  Write-ColorHost (($b.H) * (Get-ConsoleWidth)) $script:Colors.Info
+}
 function Write-Title([string]$Title) {
-  if ($script:UI.LargeText) { Write-Host '' }
-  Write-ColorHost (Center-Text $Title) $script:Colors.Accent
-  if ($script:UI.LargeText) { Write-Host '' }
+  $w = Get-ConsoleWidth
+  $b = Get-BoxChars
+  $innerW = [Math]::Max(10, $w - 2)
+  $text = ' ' + $Title + ' '
+  $pad = [Math]::Max(0, $innerW - $text.Length)
+  $lp = [Math]::Floor($pad/2)
+  $rp = $pad - $lp
+  Write-ColorHost ($b.TL + ($b.H * $innerW) + $b.TR) $script:Colors.Accent
+  Write-ColorHost ($b.V + (' ' * $lp) + $text + (' ' * $rp) + $b.V) $script:Colors.Accent
+  Write-ColorHost ($b.BL + ($b.H * $innerW) + $b.BR) $script:Colors.Accent
 }
 function Write-Status([ValidateSet('Info','Success','Warning','Error')][string]$Type,[string]$Message) {
   $color = switch ($Type) { 'Info' { $script:Colors.Info } 'Success' { $script:Colors.Success } 'Warning' { $script:Colors.Warning } 'Error' { $script:Colors.Error } }
@@ -93,8 +107,8 @@ function Write-Status([ValidateSet('Info','Success','Warning','Error')][string]$
 }
 
 function Format-MenuItem([int]$Number,[string]$Label,[string]$Suffix=$null) {
-  $label = if ($Suffix) { " {0}) {1} {2}" -f $Number, $Label, $Suffix } else { " {0}) {1}" -f $Number, $Label }
-  Write-ColorHost (Center-Text $label) $script:Colors.Info
+  $txt = if ($Suffix) { "[{0}] {1} {2}" -f $Number, $Label, $Suffix } else { "[{0}] {1}" -f $Number, $Label }
+  Write-ColorHost (Center-Text $txt) $script:Colors.Info
 }
 
 function Write-Command([string]$Text) { Write-ColorHost (Center-Text $Text) $script:Colors.Accent2 }
@@ -109,10 +123,28 @@ function Write-HighlightedLine([string]$Text) {
 }
 
 function Write-Panel([string]$Title,[string[]]$Lines) {
-  Write-Title $Title
-  $width = Get-ConsoleWidth
-  foreach ($ln in $Lines) { foreach ($w in (Wrap-Text $ln $width)) { Write-HighlightedLine $w } }
-  Write-Separator
+  $b = Get-BoxChars
+  $w = Get-ConsoleWidth
+  $innerW = [Math]::Max(20, $w - 2)
+  $titleTxt = ' ' + $Title + ' '
+  $tp = [Math]::Max(0, $innerW - $titleTxt.Length)
+  $tlp = [Math]::Floor($tp/2)
+  $trp = $tp - $tlp
+  Write-ColorHost ($b.TL + ($b.H * $innerW) + $b.TR) $script:Colors.Info
+  Write-ColorHost ($b.V + (' ' * $tlp) + $titleTxt + (' ' * $trp) + $b.V) $script:Colors.Accent
+  Write-ColorHost ($b.V + ($b.H * $innerW) + $b.V) $script:Colors.Info
+  foreach ($ln in $Lines) {
+    foreach ($seg in (Wrap-Text $ln $innerW)) {
+      $lc = $seg.ToLower()
+      $color = $script:Colors.Info
+      if ($lc -match 'error|failed|critical') { $color = $script:Colors.Error }
+      elseif ($lc -match 'warning|deprecated') { $color = $script:Colors.Warning }
+      elseif ($lc -match 'success|ok|healthy|completed|done') { $color = $script:Colors.Success }
+      $pad = [Math]::Max(0, $innerW - $seg.Length)
+      Write-ColorHost ($b.V + $seg + (' ' * $pad) + $b.V) $color
+    }
+  }
+  Write-ColorHost ($b.BL + ($b.H * $innerW) + $b.BR) $script:Colors.Info
 }
 
 function Get-AsciiLogo {

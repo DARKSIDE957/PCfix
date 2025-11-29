@@ -20,7 +20,7 @@ function Get-ServiceStatusSummary {
   $statuses = @()
   foreach ($n in $names) {
     $svc = try { Get-Service -Name $n -ErrorAction Stop } catch { $null }
-    if ($svc) { $statuses += "{0}: {1}" -f $svc.Name, $svc.Status } else { $statuses += "$n: Not found" }
+    if ($svc) { $statuses += "{0}: {1}" -f $svc.Name, $svc.Status } else { $statuses += "${n}: Not found" }
   }
   return $statuses
 }

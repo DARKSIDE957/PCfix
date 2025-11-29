@@ -49,9 +49,8 @@ function Start-VNPCfix {
       '2' {
         if (-not $isAdmin) {
           Write-Status Warning 'Repairs require Admin. Attempting elevation...'
-          $args = @('-ExecutionPolicy','Bypass','-File', (Join-Path (Split-Path -Parent $PSScriptRoot) 'PCfix.ps1'))
-          $argStr = $args -join ' '
-          if (Request-Elevation -ScriptPath 'powershell.exe' -Args $argStr) { break }
+          $pcfixPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'PCfix.ps1'
+          if (Request-Elevation -ScriptPath $pcfixPath -Args '') { break }
           Write-Status Error 'Elevation cancelled or failed. Use -NoElevate to preview.'
           continue
         }
@@ -73,6 +72,7 @@ function Start-VNPCfix {
         Format-MenuItem 14 'Reset Microsoft Store cache'
         Format-MenuItem 15 'Rebuild Windows Search index'
         Format-MenuItem 16 'Resync Windows Time service'
+        Format-MenuItem 17 'Update Everything (Windows + Defender)'
         Format-MenuItem 0 'Back'
         $r = Read-Host 'Select a repair'
         switch ($r) {
@@ -92,6 +92,7 @@ function Start-VNPCfix {
           '14' { try { Invoke-VNPCfixResetWindowsStoreCache -WhatIf:$whatIfSwitch } catch {} }
           '15' { try { Invoke-VNPCfixRebuildSearchIndex -WhatIf:$whatIfSwitch } catch {} }
           '16' { try { Invoke-VNPCfixResyncTimeService -WhatIf:$whatIfSwitch } catch {} }
+          '17' { try { Invoke-VNPCfixUpdateAll -WhatIf:$whatIfSwitch } catch {} }
           '0'  { Write-Status Info 'Returning to main menu.' }
           default { Write-Status Warning 'Invalid selection.' }
         }
@@ -102,4 +103,49 @@ function Start-VNPCfix {
   }
 }
 
-Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore, Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService
+function Invoke-VNPCfixUpdateAll {
+  [CmdletBinding(SupportsShouldProcess,ConfirmImpact='High')]
+  param()
+  try {
+    Write-Title 'Update Everything'
+    if ($PSCmdlet.ShouldProcess('Windows Update','Scan, download, and install available updates')) {
+      Write-Status Info 'Triggering Windows Update scan...'
+      try {
+        $uso = (Get-Command UsoClient.exe -ErrorAction SilentlyContinue)
+        if ($uso) {
+          Show-ProgressLoop -Title 'Windows Update Scan' -Action { UsoClient.exe StartScan }
+          Write-Status Info 'Starting update download...'
+          Show-ProgressLoop -Title 'Windows Update Download' -Action { UsoClient.exe StartDownload }
+          Write-Status Info 'Starting update install...'
+          Show-ProgressLoop -Title 'Windows Update Install' -Action { UsoClient.exe StartInstall }
+        } else {
+          Show-ProgressLoop -Title 'Windows Update Scan' -Action { wuauclt /detectnow }
+          Show-ProgressLoop -Title 'Windows Update Install' -Action { wuauclt /updatenow }
+        }
+        Write-Log -Message 'Windows Update scan/download/install triggered' -Level INFO
+        Write-Status Success 'Windows Update actions triggered.'
+      } catch {
+        Write-Status Warning "Windows Update trigger failed: $($_.Exception.Message)"
+        Write-Log -Message "Windows Update trigger failed: $($_.Exception.Message)" -Level WARN
+      }
+    }
+
+    if ($PSCmdlet.ShouldProcess('Microsoft Defender','Update signatures')) {
+      Write-Status Info 'Updating Microsoft Defender signatures...'
+      try { Update-MpSignature -ErrorAction Stop; Write-Log -Message 'Defender signatures updated' -Level INFO; Write-Status Success 'Defender signatures updated.' } catch { Write-Status Warning "Defender signature update unavailable: $($_.Exception.Message)"; Write-Log -Message "Defender signature update failed: $($_.Exception.Message)" -Level WARN }
+    }
+
+    if ($PSCmdlet.ShouldProcess('Component Cleanup','DISM StartComponentCleanup')) {
+      try { Show-ProgressLoop -Title 'Component Cleanup' -Action { DISM /Online /Cleanup-Image /StartComponentCleanup }; Write-Log -Message 'DISM StartComponentCleanup executed' -Level INFO; Write-Status Success 'Component cleanup completed.' } catch { Write-Status Warning "Component cleanup failed: $($_.Exception.Message)"; Write-Log -Message "Component cleanup failed: $($_.Exception.Message)" -Level WARN }
+    }
+
+    Write-Separator
+    Write-Status Info 'Some updates may require a restart to complete.'
+  } catch {
+    Write-Status Error "Update Everything failed: $($_.Exception.Message)"
+    Write-Log -Message "Update Everything failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore, Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService, Invoke-VNPCfixUpdateAll

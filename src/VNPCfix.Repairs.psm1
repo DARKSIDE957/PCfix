@@ -209,7 +209,7 @@ function Invoke-VNPCfixWindowsUpdateCacheRestore {
   }
 }
 
-Export-ModuleMember -Function Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore
+Export-ModuleMember -Function Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore, Invoke-VNPCfixUpdateAll
 function Invoke-VNPCfixFlushDnsAndRenewIp {
   [CmdletBinding(SupportsShouldProcess)] param()
   try {
@@ -300,4 +300,63 @@ function Invoke-VNPCfixResyncTimeService {
   }
 }
 
-Export-ModuleMember -Function Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService
+function Invoke-VNPCfixUpdateAll {
+  [CmdletBinding(SupportsShouldProcess,ConfirmImpact='High')]
+  param()
+  try {
+    Write-Title 'Update Everything'
+    if ($PSCmdlet.ShouldProcess('Windows Update','Scan, download, and install available updates')) {
+      Write-Status Info 'Triggering Windows Update scan...'
+      try {
+        $uso = (Get-Command UsoClient.exe -ErrorAction SilentlyContinue)
+        if ($uso) {
+          Show-ProgressLoop 'Windows Update Scan' { UsoClient.exe StartScan }
+          Write-Status Info 'Starting update download...'
+          Show-ProgressLoop 'Windows Update Download' { UsoClient.exe StartDownload }
+          Write-Status Info 'Starting update install...'
+          Show-ProgressLoop 'Windows Update Install' { UsoClient.exe StartInstall }
+        } else {
+          Show-ProgressLoop 'Windows Update Scan' { wuauclt /detectnow }
+          Show-ProgressLoop 'Windows Update Install' { wuauclt /updatenow }
+        }
+        Write-Log -Message 'Windows Update scan/download/install triggered' -Level INFO
+        Write-Status Success 'Windows Update actions triggered.'
+      } catch {
+        Write-Status Warning "Windows Update trigger failed: $($_.Exception.Message)"
+        Write-Log -Message "Windows Update trigger failed: $($_.Exception.Message)" -Level WARN
+      }
+    }
+
+    if ($PSCmdlet.ShouldProcess('Microsoft Defender','Update signatures')) {
+      Write-Status Info 'Updating Microsoft Defender signatures...'
+      try {
+        Update-MpSignature -ErrorAction Stop
+        Write-Log -Message 'Defender signatures updated' -Level INFO
+        Write-Status Success 'Defender signatures updated.'
+      } catch {
+        Write-Status Warning "Defender signature update unavailable: $($_.Exception.Message)"
+        Write-Log -Message "Defender signature update failed: $($_.Exception.Message)" -Level WARN
+      }
+    }
+
+    if ($PSCmdlet.ShouldProcess('Component Cleanup','DISM StartComponentCleanup')) {
+      try {
+        Show-ProgressLoop 'Component Cleanup' { DISM /Online /Cleanup-Image /StartComponentCleanup }
+        Write-Log -Message 'DISM StartComponentCleanup executed' -Level INFO
+        Write-Status Success 'Component cleanup completed.'
+      } catch {
+        Write-Status Warning "Component cleanup failed: $($_.Exception.Message)"
+        Write-Log -Message "Component cleanup failed: $($_.Exception.Message)" -Level WARN
+      }
+    }
+
+    Write-Separator
+    Write-Status Info 'Some updates may require a restart to complete.'
+  } catch {
+    Write-Status Error "Update Everything failed: $($_.Exception.Message)"
+    Write-Log -Message "Update Everything failed: $($_.Exception.Message)" -Level ERROR
+    throw
+  }
+}
+
+Export-ModuleMember -Function Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService, Invoke-VNPCfixUpdateAll

@@ -23,12 +23,13 @@
     'Invoke-VNPCfixClearTempFiles',
     'Invoke-VNPCfixRegistryRepair',
     'Invoke-VNPCfixCreateRestorePoint',
-    'Invoke-VNPCfixWindowsUpdateCacheRestore'
-    'Invoke-VNPCfixFlushDnsAndRenewIp'
-    'Invoke-VNPCfixResetFirewall'
-    'Invoke-VNPCfixResetWindowsStoreCache'
-    'Invoke-VNPCfixRebuildSearchIndex'
-    'Invoke-VNPCfixResyncTimeService'
+    'Invoke-VNPCfixWindowsUpdateCacheRestore',
+    'Invoke-VNPCfixFlushDnsAndRenewIp',
+    'Invoke-VNPCfixResetFirewall',
+    'Invoke-VNPCfixResetWindowsStoreCache',
+    'Invoke-VNPCfixRebuildSearchIndex',
+    'Invoke-VNPCfixResyncTimeService',
+    'Invoke-VNPCfixUpdateAll'
   )
   NestedModules     = @(
     'VNPCfix.Core.psm1',
