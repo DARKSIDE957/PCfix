@@ -269,7 +269,7 @@ function Prompt-Input {
   }
 }
 
-function Show-Header([string]$Title,[string]$LogFile,[string]$SessionStamp,[switch]$IsAdmin) {
+function Show-Header([string]$Title,[string]$LogFile,[string]$SessionStamp,[bool]$IsAdmin=$false) {
   Clear-Host
   Write-Title $Title
   foreach ($l in (Get-AsciiLogo)) { Write-ColorHost (Center-Text $l) $script:Colors.Accent }
