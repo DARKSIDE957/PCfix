@@ -26,8 +26,10 @@ VN PCfix is a modular PowerShell toolkit for Windows troubleshooting and repair.
   DISM StartComponentCleanup (WinSxS), clear TEMP folders
   New: DNS flush & IP renew, reset Windows Firewall, reset Microsoft Store cache,
   rebuild Windows Search index, resync Windows Time service
+- Update Everything: triggers Windows Update scan/download/install, updates Microsoft Defender signatures, and runs component cleanup
 - Logging to `%LocalAppData%\PCfix\pcfix-<timestamp>.log`
 - Accessibility and appearance options: high-contrast, no-color, ASCII icons, large text
+- Theming presets: `VN` and `VNDark` for quick branding and contrast adjustments
 
  
 
@@ -72,7 +74,10 @@ src/                      # PowerShell module and components
 ## Usage Examples
 ```powershell
 # Start interactive UI (recommended)
-Start-VNPCfix
+Start-VNPCfix -Theme VN
+
+# Start with accessibility toggles
+Start-VNPCfix -HighContrast -NoColor -BasicASCII -LargeText
 
 # Quick diagnostics (non-destructive)
 Invoke-VNPCfixDiagnostics
@@ -88,6 +93,29 @@ Invoke-VNPCfixResetFirewall -WhatIf
 Invoke-VNPCfixResetWindowsStoreCache -WhatIf
 Invoke-VNPCfixRebuildSearchIndex -WhatIf
 Invoke-VNPCfixResyncTimeService -WhatIf
+
+# Perform a full update pass (Windows Update + Defender + component cleanup)
+Invoke-VNPCfixUpdateAll -WhatIf
+```
+
+### Custom UI Helpers
+```powershell
+# Import the module
+Import-Module (Join-Path $PSScriptRoot 'src\VNPCfix.psd1') -Force
+
+# Theme presets
+Set-ThemePreset -Name 'VN'      # Cyan/Gray
+Set-ThemePreset -Name 'VNDark'  # White/DarkCyan/Gray
+
+# Render header, panels, tables
+Show-Header -Title 'VN PCfix' -LogFile 'pcfix.log' -SessionStamp (Get-Date -Format 'yyyyMMdd-HHmmss') -IsAdmin:$false
+Write-Panel -Title 'Status' -Lines @('Success: OK','Warning: Check','Error: Failed')
+Write-Table -Rows @(@{Name='CPU';Status='OK'},@{Name='Disk';Status='OK'},@{Name='Network';Status='WARN'}) -Columns @('Name','Status')
+```
+
+## Admin Notes
+- Some repairs require Administrator privileges; the app can elevate when needed.
+- Use `-WhatIf` to preview actions before applying changes.
 ```
 
 ## Compatibility
