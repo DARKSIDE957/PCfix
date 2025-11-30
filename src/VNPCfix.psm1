@@ -13,7 +13,8 @@ function Start-VNPCfix {
     [switch]$HighContrast,
     [switch]$NoColor,
     [switch]$BasicASCII,
-    [switch]$LargeText
+    [switch]$LargeText,
+    [string]$Theme
   )
 
   # Initialize state
@@ -22,6 +23,7 @@ function Start-VNPCfix {
   $cfg = Get-VNPCfixConfig
   if ($cfg) { Apply-VNPCfixConfig -Config $cfg }
   Initialize-Theme -HighContrast:$HighContrast -NoColor:$NoColor -BasicASCII:$BasicASCII -LargeText:$LargeText
+  if ($Theme) { Set-ThemePreset -Name $Theme } else { Set-ThemePreset -Name 'VN' }
   Initialize-Logging
   $isAdmin = Test-IsAdmin
   $title = 'VN PCfix – Windows Troubleshooting & Repair'
@@ -148,4 +150,4 @@ function Invoke-VNPCfixUpdateAll {
   }
 }
 
-Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore, Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService, Invoke-VNPCfixUpdateAll
+Export-ModuleMember -Function Start-VNPCfix, Set-VNPCfixOptions, Write-Log, Invoke-VNPCfixDiagnostics, Invoke-VNPCfixSfcRepair, Invoke-VNPCfixDismRepair, Invoke-VNPCfixChkdskScan, Invoke-VNPCfixChkdskFix, Invoke-VNPCfixWinsockReset, Invoke-VNPCfixWindowsUpdateReset, Invoke-VNPCfixStartComponentCleanup, Invoke-VNPCfixClearTempFiles, Invoke-VNPCfixRegistryRepair, Invoke-VNPCfixCreateRestorePoint, Invoke-VNPCfixWindowsUpdateCacheRestore, Invoke-VNPCfixFlushDnsAndRenewIp, Invoke-VNPCfixResetFirewall, Invoke-VNPCfixResetWindowsStoreCache, Invoke-VNPCfixRebuildSearchIndex, Invoke-VNPCfixResyncTimeService, Invoke-VNPCfixUpdateAll, Show-Header, Write-Panel, Write-Title, Write-Table, Set-ThemePreset, Show-StatusBar, Format-MenuItem, Write-Command

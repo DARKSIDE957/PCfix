@@ -22,6 +22,8 @@ $script:UI = [ordered]@{
   NoColor      = $false
   BasicASCII   = $false
   LargeText    = $false
+  Theme        = 'Default'
+  BoxStyle     = 'single'
 }
 
 function Initialize-Theme {
@@ -159,6 +161,114 @@ function Get-AsciiLogo {
   )
 }
 
+function Set-ThemePreset {
+  param([string]$Name)
+  $n = if ($Name) { $Name.ToLower() } else { 'default' }
+  switch ($n) {
+    'vndark' {
+      $script:UI.Theme = 'VNDark'
+      $script:Colors.Accent  = 'White'
+      $script:Colors.Accent2 = 'DarkCyan'
+      $script:Colors.Info    = 'DarkGray'
+      $script:Colors.Success = 'Green'
+      $script:Colors.Warning = 'Yellow'
+      $script:Colors.Error   = 'Red'
+      $script:UI.BoxStyle    = 'double'
+    }
+    'vn' {
+      $script:UI.Theme = 'VN'
+      $script:Colors.Accent  = 'Cyan'
+      $script:Colors.Accent2 = 'DarkCyan'
+      $script:Colors.Info    = 'Gray'
+      $script:Colors.Success = 'Green'
+      $script:Colors.Warning = 'Yellow'
+      $script:Colors.Error   = 'Red'
+      $script:UI.BoxStyle    = 'single'
+    }
+    default {
+      $script:UI.Theme = 'Default'
+      $script:UI.BoxStyle = 'single'
+    }
+}
+}
+
+function Show-StatusBar {
+  param([string]$Left,[string]$Right)
+  $w = Get-ConsoleWidth
+  $innerW = [Math]::Max(10, $w - 2)
+  $l = if ($Left) { $Left } else { '' }
+  $r = if ($Right) { $Right } else { '' }
+  $space = [Math]::Max(0, $innerW - $l.Length - $r.Length)
+  $line = $l + (' ' * $space) + $r
+  Write-ColorHost $line $script:Colors.Info
+}
+
+function Start-Spinner {
+  param([string]$Text,[int]$DurationSeconds=3)
+  $frames = @('|','/','-','<')
+  $t = [Math]::Max(1,$DurationSeconds)
+  $end = (Get-Date).AddSeconds($t)
+  $i = 0
+  while ((Get-Date) -lt $end) {
+    $f = $frames[$i % $frames.Count]
+    Write-Host ("{0} {1}" -f $f, $Text)
+    Start-Sleep -Milliseconds 200
+    $i++
+  }
+}
+
+function Write-Table {
+  param([object[]]$Rows,[string[]]$Columns)
+  if (-not $Rows -or -not $Columns) { return }
+  $w = Get-ConsoleWidth
+  $innerW = [Math]::Max(20, $w - 2)
+  $widths = @()
+  foreach ($c in $Columns) {
+    $vals = @()
+    foreach ($row in $Rows) {
+      $prop = $row.PSObject.Properties[$c]
+      $val = if ($prop) { "" + $prop.Value } else { "" }
+      $vals += $val
+    }
+    $maxData = if ($vals.Count -gt 0) { ($vals | ForEach-Object { $_.Length } | Measure-Object -Maximum).Maximum } else { 0 }
+    $maxLen = [Math]::Min(40, [Math]::Max($c.Length, $maxData))
+    $widths += $maxLen
+  }
+  $total = ($widths | Measure-Object -Sum).Sum
+  if ($total -gt $innerW) {
+    $scale = $innerW / $total
+    for ($i=0; $i -lt $widths.Count; $i++) { $widths[$i] = [Math]::Max(5, [Math]::Floor($widths[$i] * $scale)) }
+  }
+  $b = Get-BoxChars
+  $line = $b.TL + ($b.H * $innerW) + $b.TR
+  Write-ColorHost $line $script:Colors.Info
+  $hdr = ''
+  for ($i=0; $i -lt $Columns.Count; $i++) { $hdr += (' ' + $Columns[$i].PadRight($widths[$i]) + ' ') }
+  $hdr = $hdr.TrimEnd()
+  $pad = [Math]::Max(0, $innerW - $hdr.Length)
+  Write-ColorHost ($b.V + $hdr + (' ' * $pad) + $b.V) $script:Colors.Accent
+  Write-ColorHost ($b.V + ($b.H * $innerW) + $b.V) $script:Colors.Info
+  foreach ($row in $Rows) {
+    $ln = ''
+    for ($i=0; $i -lt $Columns.Count; $i++) { $val = "" + $row.$($Columns[$i]); $ln += (' ' + $val.PadRight($widths[$i]) + ' ') }
+    $ln = $ln.TrimEnd()
+    $pad2 = [Math]::Max(0, $innerW - $ln.Length)
+    Write-ColorHost ($b.V + $ln + (' ' * $pad2) + $b.V) $script:Colors.Info
+  }
+  Write-ColorHost ($b.BL + ($b.H * $innerW) + $b.BR) $script:Colors.Info
+}
+
+function Prompt-Input {
+  param([string]$Label,[scriptblock]$Validate)
+  while ($true) {
+    $in = Read-Host $Label
+    if (-not $Validate) { return $in }
+    try { $ok = & $Validate $in } catch { $ok = $false }
+    if ($ok) { return $in }
+    Write-ColorHost 'Invalid input' $script:Colors.Warning
+  }
+}
+
 function Show-Header([string]$Title,[string]$LogFile,[string]$SessionStamp,[switch]$IsAdmin) {
   Clear-Host
   Write-Title $Title
@@ -170,4 +280,4 @@ function Show-Header([string]$Title,[string]$LogFile,[string]$SessionStamp,[swit
   Write-Separator
 }
 
-Export-ModuleMember -Function Initialize-Theme, Write-ColorHost, Center-Text, Write-Separator, Write-Title, Write-Status, Format-MenuItem, Write-Command, Write-HighlightedLine, Write-Panel, Show-Header
+Export-ModuleMember -Function Initialize-Theme, Write-ColorHost, Center-Text, Write-Separator, Write-Title, Write-Status, Format-MenuItem, Write-Command, Write-HighlightedLine, Write-Panel, Show-Header, Set-ThemePreset, Show-StatusBar, Start-Spinner, Write-Table, Prompt-Input

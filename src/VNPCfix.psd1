@@ -29,7 +29,15 @@
     'Invoke-VNPCfixResetWindowsStoreCache',
     'Invoke-VNPCfixRebuildSearchIndex',
     'Invoke-VNPCfixResyncTimeService',
-    'Invoke-VNPCfixUpdateAll'
+    'Invoke-VNPCfixUpdateAll',
+    'Show-Header',
+    'Write-Panel',
+    'Write-Title',
+    'Write-Table',
+    'Set-ThemePreset',
+    'Show-StatusBar',
+    'Format-MenuItem',
+    'Write-Command'
   )
   NestedModules     = @(
     'VNPCfix.Core.psm1',
