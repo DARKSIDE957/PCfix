@@ -491,6 +491,18 @@ h1.glitch::after {
     box-shadow: 0 0 50px rgba(74, 0, 224, 0.8);
 }
 
+.btn-mega.secondary {
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn-mega.secondary:hover {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    box-shadow: 0 0 20px var(--accent-color);
+}
+
 .version {
     color: var(--text-dim);
     font-size: 0.9rem;
