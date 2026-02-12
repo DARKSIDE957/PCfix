@@ -42,7 +42,9 @@ def run_powershell(cmd):
 
 def get_system_status():
     try:
-        cpu = psutil.cpu_percent(interval=0.1)
+        # interval=None is non-blocking (returns immediately)
+        # First call returns 0.0, subsequent calls return avg since last call
+        cpu = psutil.cpu_percent(interval=None)
         ram = psutil.virtual_memory().percent
         disk = psutil.disk_usage('C:\\').percent
         return {"cpu": cpu, "ram": ram, "disk": disk}
@@ -67,7 +69,7 @@ def get_detailed_info():
                     try:
                         # DriverDesc is the user-friendly name
                         name = winreg.QueryValueEx(subkey, "DriverDesc")[0]
-                        if name and name not in gpus:
+                        if name:
                             gpus.append(name)
                     except:
                         pass

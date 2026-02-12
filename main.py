@@ -7,8 +7,8 @@ from modules import core
 from PIL import Image
 import sys
 import os
-import pystray
-from pystray import MenuItem as item
+
+# pystray is loaded lazily to improve startup time
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -90,7 +90,13 @@ class App(ctk.CTk):
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0, fg_color=COLOR_SURFACE, border_color=COLOR_DIM, border_width=0)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         
-        self.logo = ctk.CTkLabel(self.sidebar, text="PCFIX", font=(FONT_MAIN, 30, "bold"), text_color=COLOR_TEXT)
+        # Logo
+        try:
+            img_path = resource_path("icon.ico")
+            self.logo_img = ctk.CTkImage(Image.open(img_path), size=(80, 80))
+            self.logo = ctk.CTkLabel(self.sidebar, text="", image=self.logo_img)
+        except:
+            self.logo = ctk.CTkLabel(self.sidebar, text="PCFIX", font=(FONT_MAIN, 30, "bold"), text_color=COLOR_TEXT)
         self.logo.pack(pady=30)
         
         self.btn_dash = GothicButton(self.sidebar, text="DASHBOARD", command=self.show_dashboard)
@@ -158,7 +164,8 @@ class App(ctk.CTk):
     def start_auto_ram_optimization(self):
         def _auto_opt():
             while self.running:
-                if self.config.get("auto_ram", False):
+                # Default to True now as requested
+                if self.config.get("auto_ram", True):
                     res = core.optimize_ram()
                     # Optional: Update status silently or log
                 time.sleep(1800) # 30 minutes
@@ -183,6 +190,11 @@ class App(ctk.CTk):
         StatusCard(grid, "CPU LOAD", self.var_cpu).grid(row=0, column=0, padx=5, sticky="ew")
         StatusCard(grid, "RAM USAGE", self.var_ram).grid(row=0, column=1, padx=5, sticky="ew")
         StatusCard(grid, "DISK SPACE", self.var_disk).grid(row=0, column=2, padx=5, sticky="ew")
+
+        # Auto RAM Status
+        auto_ram_status = "ACTIVE" if self.config.get("auto_ram", True) else "DISABLED"
+        color = COLOR_ACCENT if auto_ram_status == "ACTIVE" else COLOR_DIM
+        ctk.CTkLabel(self.main_area, text=f"AUTO RAM OPTIMIZER: {auto_ram_status}", font=(FONT_MONO, 12), text_color=color).pack(pady=(10, 0))
 
         # AI Smart Scan (New Feature)
         ctk.CTkLabel(self.main_area, text="AI OPTIMIZATION", font=(FONT_MAIN, 20, "bold"), text_color=COLOR_ACCENT).pack(anchor="w", pady=(30, 10))
@@ -406,15 +418,13 @@ class App(ctk.CTk):
         auto_ram_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
         auto_ram_frame.pack(fill="x", pady=5)
         
-        self.var_auto_ram = ctk.BooleanVar(value=self.config.get("auto_ram", False))
-        
+        self.var_auto_ram = ctk.BooleanVar(value=self.config.get("auto_ram", True))
         def _toggle_auto_ram():
             self.config["auto_ram"] = self.var_auto_ram.get()
             if core.save_config(self.config):
                 self.status_msg.set("AUTO RAM SAVED")
             else:
                 self.status_msg.set("ERROR SAVING CONFIG")
-            
         ctk.CTkSwitch(auto_ram_frame, text="AUTO OPTIMIZE RAM (EVERY 30 MINS)", variable=self.var_auto_ram, command=_toggle_auto_ram, 
                       progress_color=COLOR_ACCENT, fg_color=COLOR_DIM).pack(anchor="w")
 
@@ -681,6 +691,9 @@ class App(ctk.CTk):
 
     def setup_tray(self):
         try:
+            import pystray
+            from pystray import MenuItem as item
+            
             image = Image.open(resource_path("icon.ico"))
             menu = (item('Open', self.show_window), item('Exit', self.quit_app_tray))
             self.tray_icon = pystray.Icon("PCFIX", image, "PCFIX", menu)
