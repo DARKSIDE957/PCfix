@@ -51,22 +51,43 @@ def get_system_status():
 
 def get_detailed_info():
     try:
-        # GPU
+        # GPU (Registry Method - Most Reliable)
         gpu = "N/A"
         try:
-            # Try PowerShell (Modern Windows)
-            r = run_powershell("Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name")
-            lines = [l.strip() for l in r.split("\n") if l.strip()]
-            if lines:
-                gpu = " | ".join(lines)
-            else:
-                # Fallback to WMIC (Legacy)
-                r = run_command("wmic path win32_videocontroller get name")
-                lines = [l.strip() for l in r.split("\n") if l.strip() and "Name" not in l]
+            gpus = []
+            # Class GUID for Display Adapters
+            guid = "{4d36e968-e325-11ce-bfc1-08002be10318}"
+            base_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, fr"SYSTEM\CurrentControlSet\Control\Class\{guid}")
+            
+            i = 0
+            while True:
+                try:
+                    subkey_name = winreg.EnumKey(base_key, i)
+                    subkey = winreg.OpenKey(base_key, subkey_name)
+                    try:
+                        # DriverDesc is the user-friendly name
+                        name = winreg.QueryValueEx(subkey, "DriverDesc")[0]
+                        if name and name not in gpus:
+                            gpus.append(name)
+                    except:
+                        pass
+                    winreg.CloseKey(subkey)
+                    i += 1
+                except OSError:
+                    break
+            winreg.CloseKey(base_key)
+            
+            if gpus:
+                gpu = " | ".join(gpus)
+        except:
+            # Fallback to PowerShell if Registry fails
+            try:
+                r = run_powershell("Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name")
+                lines = [l.strip() for l in r.split("\n") if l.strip()]
                 if lines:
                     gpu = " | ".join(lines)
-        except:
-            pass
+            except:
+                pass
 
         # OS
         os_info = "Unknown"
@@ -76,6 +97,11 @@ def get_detailed_info():
             product_name = winreg.QueryValueEx(key, "ProductName")[0]
             display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
             current_build = winreg.QueryValueEx(key, "CurrentBuild")[0]
+            try:
+                ubr = winreg.QueryValueEx(key, "UBR")[0]
+                current_build = f"{current_build}.{ubr}"
+            except:
+                pass
             winreg.CloseKey(key)
             os_info = f"{product_name} {display_version} (Build {current_build})"
         except:
