@@ -151,6 +151,19 @@ class App(ctk.CTk):
 
         # Startup Sound
         core.play_startup_sound()
+        
+        # Start Auto RAM Optimization
+        self.start_auto_ram_optimization()
+
+    def start_auto_ram_optimization(self):
+        def _auto_opt():
+            while self.running:
+                if self.config.get("auto_ram", False):
+                    res = core.optimize_ram()
+                    # Optional: Update status silently or log
+                time.sleep(1800) # 30 minutes
+        
+        threading.Thread(target=_auto_opt, daemon=True).start()
 
     def clear_main(self):
         for widget in self.main_area.winfo_children():
@@ -385,6 +398,24 @@ class App(ctk.CTk):
                 self.status_msg.set("ERROR SAVING CONFIG")
             
         ctk.CTkSwitch(bg_frame, text="MINIMIZE TO TRAY ON CLOSE", variable=self.var_tray, command=_toggle_tray, 
+                      progress_color=COLOR_ACCENT, fg_color=COLOR_DIM).pack(anchor="w")
+
+        # Auto RAM Optimize Section
+        ctk.CTkLabel(self.main_area, text="AUTOMATION", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
+        
+        auto_ram_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
+        auto_ram_frame.pack(fill="x", pady=5)
+        
+        self.var_auto_ram = ctk.BooleanVar(value=self.config.get("auto_ram", False))
+        
+        def _toggle_auto_ram():
+            self.config["auto_ram"] = self.var_auto_ram.get()
+            if core.save_config(self.config):
+                self.status_msg.set("AUTO RAM SAVED")
+            else:
+                self.status_msg.set("ERROR SAVING CONFIG")
+            
+        ctk.CTkSwitch(auto_ram_frame, text="AUTO OPTIMIZE RAM (EVERY 30 MINS)", variable=self.var_auto_ram, command=_toggle_auto_ram, 
                       progress_color=COLOR_ACCENT, fg_color=COLOR_DIM).pack(anchor="w")
 
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 12), text_color=COLOR_DIM).pack(side="bottom", anchor="w")

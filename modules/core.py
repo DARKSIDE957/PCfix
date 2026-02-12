@@ -54,12 +54,33 @@ def get_detailed_info():
         # GPU
         gpu = "N/A"
         try:
-            r = run_command("wmic path win32_videocontroller get name")
-            lines = [l.strip() for l in r.split("\n") if l.strip() and "Name" not in l]
+            # Try PowerShell (Modern Windows)
+            r = run_powershell("Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name")
+            lines = [l.strip() for l in r.split("\n") if l.strip()]
             if lines:
-                gpu = lines[0]
+                gpu = " | ".join(lines)
+            else:
+                # Fallback to WMIC (Legacy)
+                r = run_command("wmic path win32_videocontroller get name")
+                lines = [l.strip() for l in r.split("\n") if l.strip() and "Name" not in l]
+                if lines:
+                    gpu = " | ".join(lines)
         except:
             pass
+
+        # OS
+        os_info = "Unknown"
+        try:
+            # Try to get detailed build info from Registry
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion")
+            product_name = winreg.QueryValueEx(key, "ProductName")[0]
+            display_version = winreg.QueryValueEx(key, "DisplayVersion")[0]
+            current_build = winreg.QueryValueEx(key, "CurrentBuild")[0]
+            winreg.CloseKey(key)
+            os_info = f"{product_name} {display_version} (Build {current_build})"
+        except:
+            # Fallback
+            os_info = f"{platform.system()} {platform.release()} ({platform.version()})"
 
         # Uptime
         uptime = "N/A"
@@ -70,7 +91,7 @@ def get_detailed_info():
             pass
 
         info = {
-            "os": f"{platform.system()} {platform.release()} ({platform.version()})",
+            "os": os_info,
             "cpu": platform.processor(),
             "gpu": gpu,
             "ram": f"{round(psutil.virtual_memory().total / (1024**3), 2)} GB",
