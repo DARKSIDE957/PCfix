@@ -1,6 +1,0 @@
-[build]
-  publish = "."
-  command = "# No build command required for static site"
-
-[context.production]
-  environment = { NODE_VERSION = "20" }
