@@ -1,24 +1,68 @@
-# PCFIX | NECROMANCER EDITION
+# PCFIX | NECROMANCER
 
-**This repository contains the source code for the PCFIX official website.**
+**Ultimate System Optimization & Diagnostics Tool for Windows**
 
-## ⬇️ Download PCFIX
-You can download the latest version of **PCFIX (All-In-One Edition)** directly from our official website:
-👉 **[https://darkside957.github.io/PCfix/](https://darkside957.github.io/PCfix/)**
+![Version](https://img.shields.io/badge/version-3.1-blue.svg)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+**RESURRECT YOUR PC** with high-performance optimization, deep cleaning, and advanced diagnostics.
+
+---
+
+## 📥 Download
+
+**[DOWNLOAD SETUP (v3.1)](https://drive.google.com/file/d/1E-j2qDwZIhGc0y_LjdrukGTbtBuHW6-u/view?usp=sharing)**
 
 ---
 
-## 💀 What is PCFIX?
-PCFIX is the ultimate system utility designed to resurrect your PC. It is a lightweight, standalone application (No Install Required) compatible with Windows 10 and 11.
+## 🔥 Key Features
 
-### 🔥 Key Features
-*   **Advanced Debloating**: Remove unnecessary bloatware and optimize system performance.
-*   **Privacy Protection**: Secure your data and disable invasive tracking.
-*   **System Repair**: Fix common Windows issues and corruption.
-*   **Network Optimization**: Improve internet connection stability and speed.
-*   **Hardware Diagnostics**: Check the health of your system components.
-*   **Modern Gothic UI**: A premium, high-contrast dark theme for low resource usage.
+### ⚡ System Mastery
+- **Hardware Insight:** Deep scan analysis of CPU, GPU, RAM, and motherboard metrics. Reveal what Windows hides.
+- **AI Auto-Pilot:** One-click smart optimization. Clean, boost, and repair your system instantly.
+- **Force Cleaner:** Obliterate locked files and stubborn folders that refuse to be deleted.
+
+### 🌐 Network Commander
+- **Real-time Latency Monitoring:** Keep track of your ping and connection stability.
+- **DNS Switcher:** Instantly switch between Google, Cloudflare, and OpenDNS for faster browsing.
+- **Privacy Mode:** Hide your IP and MAC address with a single click.
+- **Adapter Reset:** Flush DNS and reset network adapters to fix connectivity issues.
+
+### ☠️ BSOD Analyzer
+- **Crash Log Decoder:** Don't fear the Blue Screen. Decode it.
+- **Auto-Fix:** Suggested fixes for common critical errors like `CRITICAL_PROCESS_DIED`.
+- **System Repair Tools:** Integrated SFC Scan, CHKDSK, and Memory Diagnostic tools.
 
 ---
-**Developer:** DARKSIDE957
-**Edition:** ALL IN ONE EDITION
+
+## 🛠️ Installation
+
+1. Download the latest `PCFIX_Setup.exe` from the link above.
+2. Run the installer and follow the on-screen instructions.
+3. Launch PCFIX from your desktop or start menu.
+
+---
+
+## 💻 Development
+
+### Prerequisites
+- Python 3.10+
+- `pip install -r requirements.txt`
+
+### Build from Source
+To build the executable yourself:
+```bash
+python build.py
+```
+The output will be in the `dist/` directory.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+&copy; 2026 PCFIX Development. All systems nominal.
