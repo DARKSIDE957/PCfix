@@ -44,21 +44,6 @@
 
 ---
 
-## 💻 Development
-
-### Prerequisites
-- Python 3.10+
-- `pip install -r requirements.txt`
-
-### Build from Source
-To build the executable yourself:
-```bash
-python build.py
-```
-The output will be in the `dist/` directory.
-
----
-
 ## 📜 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
