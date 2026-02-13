@@ -20,3 +20,6 @@ dist/
 .vscode/
 .idea/
 *.swp
+
+# Executables (User will add to Releases manually)
+*.exe

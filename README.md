@@ -12,7 +12,7 @@
 
 ## 📥 Download
 
-**[DOWNLOAD SETUP (v3.1)](https://drive.google.com/file/d/1E-j2qDwZIhGc0y_LjdrukGTbtBuHW6-u/view?usp=sharing)**
+**[👉 DOWNLOAD LATEST VERSION](https://github.com/DARKSIDE957/PCfix/releases/latest)**
 
 ---
 
