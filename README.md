@@ -10,11 +10,6 @@
 
 ---
 
-## 📥 Download
-
-**[👉 DOWNLOAD LATEST VERSION](https://github.com/DARKSIDE957/PCfix/releases/latest)**
-
----
 
 ## 🔥 Key Features
 
@@ -38,7 +33,7 @@
 
 ## 🛠️ Installation
 
-1. Download the latest `PCFIX_Setup.exe` from the link above.
+1. Download the latest `PCFIX_Setup.exe` from the [Releases page](../../releases).
 2. Run the installer and follow the on-screen instructions.
 3. Launch PCFIX from your desktop or start menu.
 
