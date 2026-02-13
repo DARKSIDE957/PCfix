@@ -2,7 +2,7 @@
 
 **Ultimate System Optimization & Diagnostics Tool for Windows**
 
-![Version](https://img.shields.io/badge/version-3.1-blue.svg)
+![Version](https://img.shields.io/badge/version-3.2-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 

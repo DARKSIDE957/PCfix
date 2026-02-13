@@ -432,7 +432,7 @@ class App(ctk.CTk):
 
     def show_about(self):
         self.clear_main()
-        ctk.CTkLabel(self.main_area, text="PCFIX v3.1", font=(FONT_MAIN, 24, "bold"), text_color=COLOR_ACCENT).pack(pady=(40, 5))
+        ctk.CTkLabel(self.main_area, text="PCFIX v3.2", font=(FONT_MAIN, 24, "bold"), text_color=COLOR_ACCENT).pack(pady=(40, 5))
         ctk.CTkLabel(self.main_area, text="NECROMANCER | ALL IN ONE EDITION", font=(FONT_MONO, 14), text_color=COLOR_DIM).pack(pady=(0, 20))
         
         # Description

@@ -105,6 +105,16 @@ def get_detailed_info():
             except:
                 pass
             winreg.CloseKey(key)
+
+            # Fix Windows 11 Detection (Build >= 22000)
+            if "Windows 10" in product_name:
+                try:
+                    build_num = int(current_build.split('.')[0])
+                    if build_num >= 22000:
+                        product_name = product_name.replace("Windows 10", "Windows 11")
+                except:
+                    pass
+
             os_info = f"{product_name} {display_version} (Build {current_build})"
         except:
             # Fallback

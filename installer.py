@@ -15,7 +15,7 @@ import customtkinter as ctk
 APP_NAME = "PCFIX"
 EXE_NAME = "PCFIX.exe"
 DEFAULT_INSTALL_DIR = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), APP_NAME)
-APP_VERSION = "3.1"
+APP_VERSION = "3.2"
 
 # --- Theme Colors (Gothic/Dark/Cyberpunk) ---
 COLOR_BG = "#050505"       # Deep Black

@@ -33,7 +33,15 @@ def clean_old_builds():
         os.remove("PCFIX.spec")
     if os.path.exists("PCFIX_Setup.spec"):
         os.remove("PCFIX_Setup.spec")
+    
+    # Remove versioned specs if any
+    for f in os.listdir("."):
+        if f.startswith("PCFIX_Setup_") and f.endswith(".spec"):
+            os.remove(f)
+            
     print("Cleaned.")
+
+VERSION = "v3.2"
 
 def build_exe():
     print("Building PCFIX.exe...")
@@ -59,7 +67,8 @@ def build_exe():
     print("PCFIX.exe Build complete.")
 
 def build_setup():
-    print("Building PCFIX_Setup.exe...")
+    setup_name = f"PCFIX_Setup_{VERSION}"
+    print(f"Building {setup_name}.exe...")
     
     # Check if main app exists
     main_exe = os.path.join("dist", "PCFIX.exe")
@@ -74,20 +83,26 @@ def build_setup():
         "--windowed",
         "--uac-admin", # Request admin for setup
         "--icon", "icon.ico",
-        "--name", "PCFIX_Setup",
+        "--name", setup_name,
         "--add-data", f"{main_exe};.", # Bundle the main exe
         "installer.py"
     ]
     
     subprocess.run(cmd, check=True)
-    print("PCFIX_Setup.exe Build complete.")
+    print(f"{setup_name}.exe Build complete.")
 
 if __name__ == "__main__":
     clean_old_builds()
     build_exe()
     build_setup()
     
-    if os.path.exists("dist/PCFIX.exe") and os.path.exists("dist/PCFIX_Setup.exe"):
-        print("SUCCESS: dist/PCFIX.exe and dist/PCFIX_Setup.exe created.")
+    setup_exe = f"PCFIX_Setup_{VERSION}.exe"
+    portable_exe = f"PCFIX_{VERSION}.exe"
+    
+    if os.path.exists("dist/PCFIX.exe") and os.path.exists(f"dist/{setup_exe}"):
+        # Rename PCFIX.exe to versioned name for portable distribution
+        shutil.move("dist/PCFIX.exe", f"dist/{portable_exe}")
+        
+        print(f"SUCCESS: dist/{portable_exe} and dist/{setup_exe} created.")
     else:
         print("ERROR: Build failed.")
