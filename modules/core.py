@@ -47,7 +47,19 @@ def get_system_status():
         cpu = psutil.cpu_percent(interval=None)
         ram = psutil.virtual_memory().percent
         disk = psutil.disk_usage('C:\\').percent
-        return {"cpu": cpu, "ram": ram, "disk": disk}
+        
+        status = {"cpu": cpu, "ram": ram, "disk": disk}
+        
+        # Battery Check (Laptop Compatibility)
+        try:
+            battery = psutil.sensors_battery()
+            if battery:
+                status["battery"] = battery.percent
+                status["plugged"] = battery.power_plugged
+        except:
+            pass
+            
+        return status
     except:
         return {"cpu": 0, "ram": 0, "disk": 0}
 
@@ -128,9 +140,18 @@ def get_detailed_info():
         except:
             pass
 
+        # CPU (Registry Method)
+        cpu_name = platform.processor()
+        try:
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0")
+            cpu_name = winreg.QueryValueEx(key, "ProcessorNameString")[0]
+            winreg.CloseKey(key)
+        except:
+            pass
+
         info = {
             "os": os_info,
-            "cpu": platform.processor(),
+            "cpu": cpu_name,
             "gpu": gpu,
             "ram": f"{round(psutil.virtual_memory().total / (1024**3), 2)} GB",
             "uptime": uptime,
@@ -138,6 +159,14 @@ def get_detailed_info():
             "Architecture": platform.machine(),
             "Disk Total": f"{round(psutil.disk_usage('C:').total / (1024**3), 2)} GB"
         }
+        
+        try:
+            bat = psutil.sensors_battery()
+            if bat:
+                info["battery"] = f"{bat.percent}% ({'Plugged In' if bat.power_plugged else 'On Battery'})"
+        except:
+            pass
+
         return info
     except:
         return {}
@@ -224,6 +253,8 @@ def kill_process_by_name(name):
                 pass
     return f"Terminated {count} processes matching '{name}'"
 
+kill_process = kill_process_by_name
+
 # --- REPAIR TOOLS ---
 
 def run_sfc():
@@ -245,16 +276,48 @@ def reset_network():
     return "\n".join(log)
 
 def get_bsod_history():
-    # Use BlueScreenView logic or event logs.
-    # Parsing Minidump folder is complex, simpler to query Event Log for BugCheck
+    # Query System Event Log for BugCheck events (Event ID 1001)
+    crashes = []
     try:
-        cmd = "Get-EventLog -LogName System -Source 'Microsoft-Windows-WER-SystemErrorReporting' -Newest 10 | Select-Object TimeGenerated, Message"
+        # We use PowerShell to get the last 5 BugCheck events formatted as a list
+        cmd = "Get-EventLog -LogName System -EventId 1001 -Newest 5 | Format-List TimeGenerated, Message"
         res = run_powershell(cmd)
-        if not res:
-            return "No recent BSOD events found in System Log."
-        return res
-    except:
-        return "Could not retrieve BSOD history."
+        
+        if not res or "No matches found" in res:
+            return []
+
+        # Parse the output. PowerShell Format-List output separates entries with blank lines.
+        # We split by "TimeGenerated :" since that's the first field we requested.
+        raw_entries = res.split("TimeGenerated :")
+        
+        for entry in raw_entries:
+            if not entry.strip():
+                continue
+                
+            lines = entry.strip().split("\n")
+            time_val = lines[0].strip()
+            
+            # Find message
+            message_val = "Unknown Error"
+            for line in lines:
+                if line.strip().startswith("Message :"):
+                    message_val = line.replace("Message :", "").strip()
+                    break
+            
+            # Extract BugCheck Code (Hex)
+            code_val = "CRITICAL"
+            match = re.search(r'0x[0-9A-Fa-f]{8}', message_val)
+            if match:
+                code_val = match.group(0)
+            
+            crashes.append({
+                "time": time_val,
+                "code": code_val
+            })
+            
+        return crashes
+    except Exception:
+        return []
 
 def run_memory_diagnostic():
     return run_command("mdsched.exe")

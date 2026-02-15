@@ -1,10 +1,12 @@
-# PCFIX | NECROMANCER
+![Version](https://img.shields.io/badge/version-v3.7-red)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-**Ultimate System Optimization & Diagnostics Tool for Windows**
+# PCFIX | NECROMANCER EDITION v3.7
 
-![Version](https://img.shields.io/badge/version-3.2-blue.svg)
-![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-brightgreen.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+**Status: Beta – still in active development. Features may change.**
+
+**The Ultimate System Optimization & Repair Tool**
 
 **RESURRECT YOUR PC** with high-performance optimization, deep cleaning, and advanced diagnostics.
 

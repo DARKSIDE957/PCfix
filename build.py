@@ -41,7 +41,7 @@ def clean_old_builds():
             
     print("Cleaned.")
 
-VERSION = "v3.2"
+VERSION = "v3.7"
 
 def build_exe():
     print("Building PCFIX.exe...")
@@ -91,10 +91,34 @@ def build_setup():
     subprocess.run(cmd, check=True)
     print(f"{setup_name}.exe Build complete.")
 
+def build_tester():
+    print("Building PCFIX Diagnostic Tool...")
+    # Assume customtkinter is installed
+    import customtkinter
+    ctk_path = os.path.dirname(customtkinter.__file__)
+    
+    cmd = [
+        "pyinstaller",
+        "--noconfirm",
+        "--onefile",
+        "--windowed",
+        "--name", "PCFIX_Tester",
+        "--icon", "icon.ico",
+        "--hidden-import", "modules",
+        "--hidden-import", "modules.core",
+        "--add-data", f"{ctk_path};customtkinter",
+        "--add-data", "modules;modules",
+        "diagnostic_tool.py"
+    ]
+    
+    subprocess.run(cmd, check=True)
+    print("PCFIX_Tester.exe Build complete.")
+
 if __name__ == "__main__":
     clean_old_builds()
     build_exe()
     build_setup()
+    build_tester()
     
     setup_exe = f"PCFIX_Setup_{VERSION}.exe"
     portable_exe = f"PCFIX_{VERSION}.exe"
