@@ -2,7 +2,7 @@
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-# PCFIX | NECROMANCER EDITION v3.7
+# PCFIX | NECROMANCER EDITION 
 
 **Status: Beta – still in active development. Features may change.**
 
