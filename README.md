@@ -1,8 +1,8 @@
-![Version](https://img.shields.io/badge/version-v3.7-red)
+![Version](https://img.shields.io/badge/version-v3.8-red)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-# PCFIX | NECROMANCER EDITION 
+# PCFIX | NECROMANCER EDITION v3.8
 
 **Status: Beta – still in active development. Features may change.**
 
@@ -38,6 +38,12 @@
 1. Download the latest `PCFIX_Setup.exe` from the [Releases page](../../releases).
 2. Run the installer and follow the on-screen instructions.
 3. Launch PCFIX from your desktop or start menu.
+
+---
+
+## ⚠️ Disclaimer
+
+By using PCFIX you accept that any actions you take with the app are your own responsibility. Proceed with care and back up important data before applying system changes.
 
 ---
 
