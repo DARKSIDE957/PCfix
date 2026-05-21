@@ -2,9 +2,15 @@ import os
 import shutil
 import subprocess
 import time
-import psutil
+
+try:
+    import psutil
+except ImportError:
+    psutil = None
 
 def kill_process(name):
+    if psutil is None:
+        return
     for proc in psutil.process_iter(['pid', 'name']):
         if proc.info['name'] == name:
             try:
@@ -12,10 +18,36 @@ def kill_process(name):
                 proc.wait(timeout=3)
             except:
                 pass
+            
+def safe_remove(path):
+    if not os.path.exists(path):
+        return
+    try:
+        os.remove(path)
+    except Exception as e:
+        print(f"Warning: could not remove {path}: {e}")
+        try:
+            os.replace(path, path + ".old")
+        except Exception as e2:
+            print(f"Warning: could not rename {path}: {e2}")
+
+def safe_move(src, dst):
+    # Ensure destination directory exists
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    # If destination exists, remove or overwrite
+    if os.path.exists(dst):
+        safe_remove(dst)
+    try:
+        os.replace(src, dst)  # atomic replace on Windows
+    except Exception:
+        shutil.move(src, dst)
 
 def clean_old_builds():
     print("Cleaning old builds...")
     kill_process("PCFIX.exe")
+    kill_process("PCFIX_v3.8.exe")
+    kill_process("PCFIX_v3.9.exe")
+    kill_process("PCFIX_v3.10.exe")
     
     # Try multiple times to delete dist
     for i in range(3):
@@ -41,7 +73,7 @@ def clean_old_builds():
             
     print("Cleaned.")
 
-VERSION = "v3.7"
+VERSION = "v3.10"
 
 def build_exe():
     print("Building PCFIX.exe...")
@@ -53,10 +85,16 @@ def build_exe():
         "--noconfirm",
         "--onefile",
         "--windowed",
+        "--uac-admin",
         "--icon", "icon.ico",
         "--name", "PCFIX",
         "--hidden-import", "modules",
         "--hidden-import", "modules.core",
+        "--hidden-import", "PIL",
+        "--hidden-import", "PIL.Image",
+        "--hidden-import", "pystray",
+        "--hidden-import", "psutil",
+        "--collect-submodules", "customtkinter",
         "--add-data", f"{ctk_path};customtkinter",
         "--add-data", "modules;modules",
         "--add-data", "icon.ico;.",
@@ -76,15 +114,22 @@ def build_setup():
         print(f"Error: {main_exe} not found. Build main app first.")
         return
 
+    import customtkinter
+    ctk_path = os.path.dirname(customtkinter.__file__)
     cmd = [
         "pyinstaller",
         "--noconfirm",
         "--onefile",
         "--windowed",
-        "--uac-admin", # Request admin for setup
+        "--uac-admin",
         "--icon", "icon.ico",
         "--name", setup_name,
-        "--add-data", f"{main_exe};.", # Bundle the main exe
+        "--hidden-import", "PIL",
+        "--hidden-import", "PIL.Image",
+        "--collect-submodules", "customtkinter",
+        "--add-data", f"{ctk_path};customtkinter",
+        "--add-data", f"{main_exe};.",
+        "--add-data", "icon.ico;.",
         "installer.py"
     ]
     
@@ -115,17 +160,20 @@ def build_tester():
     print("PCFIX_Tester.exe Build complete.")
 
 if __name__ == "__main__":
+    import sys
+    skip_tester = "--no-tester" in sys.argv
     clean_old_builds()
     build_exe()
     build_setup()
-    build_tester()
+    if not skip_tester:
+        build_tester()
     
     setup_exe = f"PCFIX_Setup_{VERSION}.exe"
     portable_exe = f"PCFIX_{VERSION}.exe"
     
     if os.path.exists("dist/PCFIX.exe") and os.path.exists(f"dist/{setup_exe}"):
         # Rename PCFIX.exe to versioned name for portable distribution
-        shutil.move("dist/PCFIX.exe", f"dist/{portable_exe}")
+        safe_move("dist/PCFIX.exe", f"dist/{portable_exe}")
         
         print(f"SUCCESS: dist/{portable_exe} and dist/{setup_exe} created.")
     else:

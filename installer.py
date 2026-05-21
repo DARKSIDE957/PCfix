@@ -10,19 +10,21 @@ import winreg
 from tkinter import filedialog
 from PIL import Image
 import customtkinter as ctk
+import urllib.request
+import tempfile
 
 # --- Configuration ---
 APP_NAME = "PCFIX"
 EXE_NAME = "PCFIX.exe"
 DEFAULT_INSTALL_DIR = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), APP_NAME)
-APP_VERSION = "3.7"
+APP_VERSION = "3.10"
 
 # --- Theme Colors (Gothic/Dark/Cyberpunk) ---
 COLOR_BG = "#050505"       # Deep Black
 COLOR_SIDEBAR = "#0a0a0a"  # Slightly Lighter Black
 COLOR_SURFACE = "#121212"  # Dark Gray
-COLOR_ACCENT = "#4a00e0"   # Deep Purple/Blue Neon
-COLOR_ACCENT_HOVER = "#3d00b8"
+COLOR_ACCENT = "#d00000"
+COLOR_ACCENT_HOVER = "#a00000"
 COLOR_TEXT = "#e0e0e0"     # Light Gray
 COLOR_DIM = "#606060"      # Dim Gray
 COLOR_SUCCESS = "#00c853"
@@ -257,6 +259,66 @@ class InstallerApp(ctk.CTk):
         self.log_box.insert("end", f"> {message}\n")
         self.log_box.see("end")
 
+    def reg_get_dword(self, root, path, name):
+        try:
+            key = winreg.OpenKey(root, path)
+            val, typ = winreg.QueryValueEx(key, name)
+            winreg.CloseKey(key)
+            return int(val)
+        except:
+            return None
+
+    def is_net48_installed(self):
+        release = self.reg_get_dword(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full", "Release")
+        return bool(release and release >= 528040)
+
+    def is_vc_redist_installed(self):
+        installed_x64 = self.reg_get_dword(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64", "Installed")
+        installed_x86 = self.reg_get_dword(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x86", "Installed")
+        return (installed_x64 == 1) or (installed_x86 == 1)
+
+    def is_webview2_installed(self):
+        try:
+            clients_path = r"SOFTWARE\Microsoft\EdgeUpdate\Clients"
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, clients_path)
+            i = 0
+            while True:
+                try:
+                    subkey_name = winreg.EnumKey(key, i)
+                    subkey = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, clients_path + "\\" + subkey_name)
+                    name, _ = winreg.QueryValueEx(subkey, "name")
+                    winreg.CloseKey(subkey)
+                    if isinstance(name, str) and "WebView2" in name:
+                        winreg.CloseKey(key)
+                        return True
+                    i += 1
+                except OSError:
+                    break
+            winreg.CloseKey(key)
+        except:
+            pass
+        return False
+
+    def download_and_install(self, name, url, silent_args):
+        try:
+            self.status_label.configure(text=f"Downloading {name}...")
+            self.log(f"Downloading: {url}")
+            temp_dir = tempfile.gettempdir()
+            dest = os.path.join(temp_dir, f"{name.replace(' ', '_')}_{int(time.time())}.exe")
+            urllib.request.urlretrieve(url, dest)
+            self.log(f"Saved: {dest}")
+            self.status_label.configure(text=f"Installing {name}...")
+            subprocess.run(f'"{dest}" {silent_args}', shell=True, check=True)
+            self.log(f"Installed: {name}")
+            try:
+                os.remove(dest)
+            except:
+                pass
+            return True
+        except Exception as e:
+            self.log(f"Dependency install failed for {name}: {e}")
+            return False
+
     def run_installation(self):
         install_dir = self.var_path.get()
         exe_source = resource_path(EXE_NAME)
@@ -270,6 +332,23 @@ class InstallerApp(ctk.CTk):
             return
 
         try:
+            self.status_label.configure(text="Checking dependencies...")
+            self.progress.set(0.05)
+            deps = [
+                ("Microsoft Visual C++ Redistributable (x64)", "https://aka.ms/vs/17/release/vc_redist.x64.exe", "/install /quiet /norestart", self.is_vc_redist_installed),
+                (".NET Framework 4.8", "https://download.microsoft.com/download/2/6/8/26834F48-4C2B-4CC6-9DCE-4604BCA24F9F/ndp48-web.exe", "/q /norestart", self.is_net48_installed),
+                ("Microsoft Edge WebView2 Runtime (x64)", "https://go.microsoft.com/fwlink/p/?LinkId=2124703", "/silent /install", self.is_webview2_installed),
+            ]
+            for idx, (name, url, silent, checker) in enumerate(deps, start=1):
+                try:
+                    if checker():
+                        self.log(f"{name} already installed.")
+                    else:
+                        self.download_and_install(name, url, silent)
+                except Exception as e:
+                    self.log(f"Check failed for {name}: {e}")
+                self.progress.set(0.05 + idx * 0.05)
+
             # 1. Directories
             self.status_label.configure(text="Creating directories...")
             self.log(f"Creating directory: {install_dir}")
@@ -362,4 +441,3 @@ if __name__ == "__main__":
     else:
         app = InstallerApp()
         app.mainloop()
-

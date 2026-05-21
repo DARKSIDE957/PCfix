@@ -1,8 +1,8 @@
-![Version](https://img.shields.io/badge/version-v3.7-red)
+![Version](https://img.shields.io/badge/version-v3.10-red)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-# PCFIX | NECROMANCER EDITION v3.7
+# PCFIX | NECROMANCER EDITION v3.10
 
 **Status: Beta – still in active development. Features may change.**
 
@@ -38,6 +38,56 @@
 1. Download the latest `PCFIX_Setup.exe` from the [Releases page](../../releases).
 2. Run the installer and follow the on-screen instructions.
 3. Launch PCFIX from your desktop or start menu.
+
+---
+
+## ⚡ Quick Start
+
+- Run PCFIX as Administrator for full functionality (`python main.py` launches the full desktop UI).
+- Optional Chromium shell: `python main.py --webview` or set `PCFIX_UI=webview`.
+- Open “🧩 Tweaks” and enable only what you need. Each toggle shows a short description and risk note.
+- Use “CLEANING PROTOCOLS” to free space safely, then reboot.
+- For BSOD issues, open “BSOD ANALYZER”, view details, and export a report.
+- Settings are stored in `%LOCALAPPDATA%\PCFIX\config.json`.
+
+---
+
+## ✅ Requirements
+
+- Windows 10 or 11 (x64)
+- Administrator rights for system changes
+- Dependencies (installer can auto‑install if missing):
+  - Microsoft Visual C++ Redistributable (x64)
+  - .NET Framework 4.8
+  - Microsoft Edge WebView2 Runtime (x64)
+
+---
+
+## ⚠️ Disclaimer
+
+By using PCFIX you accept that any actions you take with the app are your own responsibility. Proceed with care and back up important data before applying system changes.
+
+---
+
+## 🧩 Troubleshooting
+
+- PCFIX doesn’t start:
+  - Install VC++ x64, .NET 4.8, and WebView2, then try again.
+  - Right‑click → Run as Administrator.
+- Tweaks didn’t apply:
+  - Reboot after applying system/service changes.
+  - Check that antivirus or group policies aren’t blocking registry edits.
+- BSOD tools:
+  - Some logs require admin and recent crashes to appear.
+
+---
+
+## 🗑️ Uninstall
+
+- Close PCFIX.
+- Remove the install folder (default: `C:\Program Files\PCFIX`).
+- Delete shortcuts from Desktop and Start Menu if needed.
+- Optional: Remove `HKCU\Software\PCFIX` registry key.
 
 ---
 

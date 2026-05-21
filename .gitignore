@@ -23,3 +23,7 @@ dist/
 
 # Executables (User will add to Releases manually)
 *.exe
+
+# Nested clone / debug
+PCfix/
+debug-*.log

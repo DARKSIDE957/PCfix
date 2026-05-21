@@ -11,11 +11,11 @@ from modules import core
 # --- Configuration ---
 APP_NAME = "PCFIX DIAGNOSTIC TOOL"
 VERSION = "v1.0"
-TARGET_VERSION = "3.7"
+TARGET_VERSION = "3.10"
 DIST_DIR = "dist"
-APP_EXE = f"PCFIX_{VERSION.replace('v', '')}.exe" if 'v' in VERSION else "PCFIX_v3.7.exe" # Fallback logic, will refine
-APP_EXE_NAME = "PCFIX_v3.7.exe"
-SETUP_EXE_NAME = "PCFIX_Setup_v3.7.exe"
+APP_EXE = f"PCFIX_{VERSION.replace('v', '')}.exe" if 'v' in VERSION else "PCFIX_v3.8.exe"
+APP_EXE_NAME = "PCFIX_v3.10.exe"
+SETUP_EXE_NAME = "PCFIX_Setup_v3.10.exe"
 
 # Colors
 COLOR_BG = "#050505"
