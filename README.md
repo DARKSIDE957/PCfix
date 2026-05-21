@@ -30,8 +30,6 @@
 - [Downloads](#downloads)
 - [Features](#features)
 - [App modules](#app-modules)
-- [Quick start](#quick-start)
-- [Build from source](#build-from-source)
 - [Requirements](#requirements)
 - [Troubleshooting](#troubleshooting)
 - [Uninstall](#uninstall)
@@ -124,46 +122,6 @@
 
 ---
 
-## Quick start
-
-### Using the release build
-1. Install or run **`PCFIX_Setup_v3.10.exe`** / **`PCFIX_v3.10.exe`** as Administrator.
-2. Open **Tweaks** or **Cleaner** and enable only what you understand — each switch includes a short description and risk note.
-3. Reboot after major system or service changes.
-
-### Running from source
-```bash
-git clone https://github.com/DARKSIDE957/PCfix.git
-cd PCfix
-pip install -r requirements.txt
-python main.py
-```
-
-| Command | Result |
-|---------|--------|
-| `python main.py` | Full **CustomTkinter** desktop app (default) |
-| `python main.py --webview` | Lighter Chromium-based shell |
-| `set PCFIX_UI=webview` | Same as `--webview` on Windows |
-| `python bsod_cli.py path\to\dump.dmp` | Analyze crash dumps from the terminal |
-| `python scripts/health_check.py` | Quick API smoke test |
-
-**Config file:** `%LOCALAPPDATA%\PCFIX\config.json`
-
----
-
-## Build from source
-
-```bash
-pip install -r requirements.txt
-python build.py --no-tester
-```
-
-Outputs in `dist/`:
-- `PCFIX_v3.10.exe` — portable app  
-- `PCFIX_Setup_v3.10.exe` — installer (bundles the app exe)
-
----
-
 ## Requirements
 
 | Requirement | Notes |
@@ -172,7 +130,7 @@ Outputs in `dist/`:
 | **Privileges** | Administrator for most features |
 | **VC++ Redistributable (x64)** | Installer can download if missing |
 | **.NET Framework 4.8** | Installer can download if missing |
-| **WebView2 Runtime (x64)** | Optional; used only for `--webview` UI |
+| **WebView2 Runtime (x64)** | Installer can download if missing |
 
 ---
 
