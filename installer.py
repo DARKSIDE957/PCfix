@@ -16,6 +16,7 @@ import tempfile
 # --- Configuration ---
 APP_NAME = "PCFIX"
 EXE_NAME = "PCFIX.exe"
+APP_BUNDLE = "PCFIX"  # onedir folder bundled next to the installer
 DEFAULT_INSTALL_DIR = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), APP_NAME)
 APP_VERSION = "4.0"
 
@@ -319,16 +320,33 @@ class InstallerApp(ctk.CTk):
             self.log(f"Dependency install failed for {name}: {e}")
             return False
 
+    def _resolve_app_bundle(self):
+        """Locate the onedir PCFIX folder (bundled with installer or from local dist)."""
+        candidates = [
+            resource_path(APP_BUNDLE),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist", APP_BUNDLE),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), APP_BUNDLE),
+        ]
+        for path in candidates:
+            exe = os.path.join(path, EXE_NAME)
+            if os.path.isdir(path) and os.path.isfile(exe):
+                return path
+        # Legacy single-file fallback
+        legacy = resource_path(EXE_NAME)
+        if os.path.isfile(legacy):
+            return legacy
+        legacy_dist = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist", EXE_NAME)
+        if os.path.isfile(legacy_dist):
+            return legacy_dist
+        return None
+
     def run_installation(self):
         install_dir = self.var_path.get()
-        exe_source = resource_path(EXE_NAME)
-        
-        if not os.path.exists(exe_source):
-            exe_source = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist", EXE_NAME)
-            
-        if not os.path.exists(exe_source):
-            self.status_label.configure(text="Error: Source file missing!", text_color=COLOR_ERROR)
-            self.log("CRITICAL ERROR: Source executable not found.")
+        source = self._resolve_app_bundle()
+
+        if not source:
+            self.status_label.configure(text="Error: Source files missing!", text_color=COLOR_ERROR)
+            self.log("CRITICAL ERROR: PCFIX app bundle not found.")
             return
 
         try:
@@ -349,45 +367,65 @@ class InstallerApp(ctk.CTk):
                     self.log(f"Check failed for {name}: {e}")
                 self.progress.set(0.05 + idx * 0.05)
 
-            # 1. Directories
             self.status_label.configure(text="Creating directories...")
             self.log(f"Creating directory: {install_dir}")
-            self.progress.set(0.1)
-            time.sleep(0.5)
+            self.progress.set(0.2)
+            time.sleep(0.3)
             if not os.path.exists(install_dir):
                 os.makedirs(install_dir)
 
-            # 2. Kill Process
-            self.status_label.configure(text="Stopping services...")
+            self.status_label.configure(text="Stopping running app...")
             self.log("Checking for running instances...")
-            self.progress.set(0.3)
+            self.progress.set(0.35)
             subprocess.run(f'taskkill /F /IM "{EXE_NAME}"', shell=True, capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
             time.sleep(1)
 
-            # 3. Copy
             self.status_label.configure(text="Copying files...")
-            self.log(f"Copying {EXE_NAME}...")
             self.progress.set(0.5)
             target_exe = os.path.join(install_dir, EXE_NAME)
-            shutil.copy2(exe_source, target_exe)
-            
-            # 4. Shortcuts
+            if os.path.isdir(source):
+                self.log(f"Copying app folder from {source}...")
+                # Wipe previous install contents carefully (keep folder)
+                for name in os.listdir(install_dir):
+                    path = os.path.join(install_dir, name)
+                    try:
+                        if os.path.isdir(path):
+                            shutil.rmtree(path)
+                        else:
+                            os.remove(path)
+                    except Exception as e:
+                        self.log(f"Cleanup warning: {e}")
+                for item in os.listdir(source):
+                    src_item = os.path.join(source, item)
+                    dst_item = os.path.join(install_dir, item)
+                    if os.path.isdir(src_item):
+                        shutil.copytree(src_item, dst_item)
+                    else:
+                        shutil.copy2(src_item, dst_item)
+            else:
+                self.log(f"Copying {EXE_NAME}...")
+                shutil.copy2(source, target_exe)
+
+            if not os.path.isfile(target_exe):
+                raise FileNotFoundError(f"Installed executable missing: {target_exe}")
+
             self.status_label.configure(text="Creating shortcuts...")
-            self.progress.set(0.7)
-            
+            self.progress.set(0.75)
+
             if self.var_desktop.get():
                 self.log("Creating Desktop shortcut...")
                 desktop = os.path.join(os.environ["PUBLIC"], "Desktop")
-                if not os.path.exists(desktop): desktop = os.path.join(os.environ["USERPROFILE"], "Desktop")
+                if not os.path.exists(desktop):
+                    desktop = os.path.join(os.environ["USERPROFILE"], "Desktop")
                 create_shortcut_vbs(target_exe, os.path.join(desktop, f"{APP_NAME}.lnk"), "PCFIX System Optimizer")
 
             if self.var_startmenu.get():
                 self.log("Creating Start Menu entry...")
                 start_menu = os.path.join(os.environ["ProgramData"], r"Microsoft\Windows\Start Menu\Programs")
-                if not os.path.exists(start_menu): os.makedirs(start_menu)
+                if not os.path.exists(start_menu):
+                    os.makedirs(start_menu)
                 create_shortcut_vbs(target_exe, os.path.join(start_menu, f"{APP_NAME}.lnk"), "PCFIX System Optimizer")
 
-            # 5. Registry
             self.log("Updating Registry...")
             try:
                 key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, r"Software\PCFIX")
@@ -401,7 +439,7 @@ class InstallerApp(ctk.CTk):
             self.status_label.configure(text="Installation Complete", text_color=COLOR_SUCCESS)
             self.log("Done.")
             time.sleep(1)
-            
+
             self.after(0, lambda: self.show_step(3))
 
         except Exception as e:

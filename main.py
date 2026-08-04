@@ -24,8 +24,27 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-# --- NECROMANCER v4.0 — OLED Crimson ---
+# --- NECROMANCER v4.0 OLED Crimson ---
 APP_VERSION = "v4.0"
+
+NAV_HINTS = {
+    "dashboard": "Dashboard. Live stats and quick cleanup tools.",
+    "specs": "Specs. View hardware and system details.",
+    "cleaner": "Cleaner. Remove junk files and tune system services.",
+    "repair": "Repair. Fix corrupted system files and network stack.",
+    "debloater": "Debloater. Find and remove pre-installed bloatware.",
+    "unlocker": "Unlocker. Force delete locked or stubborn files.",
+    "force_remove": "Force Remove. Scan and quarantine app leftovers.",
+    "boost": "Boost. Apply quick performance optimizations.",
+    "tweaks": "Tweaks. Toggle individual Windows optimizations.",
+    "startup": "Startup. Enable or disable apps at boot.",
+    "privacy": "Privacy. Block telemetry and tracking.",
+    "network": "Network. Test latency and reset your adapter.",
+    "tools": "Tools. DNS, gaming mode, and quick launchers.",
+    "bsod": "BSOD Analyzer. Review crash history and fixes.",
+    "settings": "Settings. Sound, tray, and automation options.",
+    "about": "About. Learn what PCFIX does and who made it.",
+}
 COLOR_BG = "#000000"
 COLOR_SURFACE = "#0c0c0e"
 COLOR_ELEVATED = "#141416"
@@ -139,7 +158,7 @@ class App(ctk.CTk):
         self.var_ram = ctk.StringVar(value="0%")
         self.var_disk = ctk.StringVar(value="0%")
         self.var_battery = ctk.StringVar(value="N/A")
-        self.status_msg = ctk.StringVar(value="SYSTEM READY")
+        self.status_msg = ctk.StringVar(value="System ready.")
         self._ui_queue = queue.Queue()
         self._log_file = self._resolve_log_file()
         self._log("APP_START")
@@ -294,6 +313,23 @@ class App(ctk.CTk):
                 btn.configure(fg_color="transparent", hover_color="#161618", text_color=COLOR_DIM)
                 if accent:
                     accent.configure(fg_color="transparent")
+        hint = NAV_HINTS.get(nav_id)
+        if hint:
+            self.status_msg.set(hint)
+
+    def help_text(self, parent, text):
+        ctk.CTkLabel(parent, text=text, font=(FONT_MAIN, 10), text_color=COLOR_DIM,
+                     wraplength=900, justify="left").pack(anchor="w", pady=(2, 8))
+
+    def action_block(self, parent, text, command, help="", accent=False, **btn_kwargs):
+        block = ctk.CTkFrame(parent, fg_color="transparent")
+        block.pack(fill="x", pady=4)
+        btn_cls = AccentButton if accent else GothicButton
+        btn = btn_cls(block, text=text, command=command, **btn_kwargs)
+        btn.pack(fill="x")
+        if help:
+            self.help_text(block, help)
+        return block
 
     def add_config_switch(self, parent, cfg, text, key, on_func, off_func, desc, warn_text=None):
         var = ctk.BooleanVar(value=cfg.get(key, False))
@@ -306,9 +342,9 @@ class App(ctk.CTk):
             cfg[key] = var.get()
             core.save_config(cfg)
             if var.get():
-                self.run_threaded(on_func, f"APPLYING {text}...")
+                self.run_threaded(on_func, f"Applying {text}...")
             else:
-                self.run_threaded(off_func, f"REVERTING {text}...")
+                self.run_threaded(off_func, f"Reverting {text}...")
 
         sw = ctk.CTkSwitch(parent, text=text, variable=var, command=_toggle, progress_color=COLOR_ACCENT, fg_color=COLOR_BORDER)
         sw.pack(anchor="w", pady=6)
@@ -375,23 +411,16 @@ class App(ctk.CTk):
     def show_dashboard(self):
         self.set_active_nav("dashboard")
         self.clear_main()
+        self.add_header("Dashboard", "Live system stats and one-click cleanup tools.")
 
-        hero = ctk.CTkFrame(self.main_area, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=1, corner_radius=14)
-        hero.pack(fill="x", pady=(0, 18))
-        hero_inner = ctk.CTkFrame(hero, fg_color="transparent")
-        hero_inner.pack(fill="x", padx=22, pady=20)
-        ctk.CTkLabel(hero_inner, text="PCFIX", font=(FONT_DISPLAY, 32, "bold"), text_color=COLOR_TEXT).pack(anchor="w")
-        ctk.CTkLabel(
-            hero_inner,
-            text="Resurrect performance — clean, repair, and tune from one place.",
-            font=(FONT_MAIN, 13), text_color=COLOR_MUTED
-        ).pack(anchor="w", pady=(4, 14))
-        AccentButton(
-            hero_inner,
+        self.action_block(
+            self.main_area,
             text="Run Smart Scan",
-            command=lambda: self.run_threaded(core.run_smart_scan, "RUNNING SMART SCAN..."),
-            width=220
-        ).pack(anchor="w")
+            command=lambda: self.run_threaded(core.run_smart_scan, "Running smart scan..."),
+            help="Checks common issues and runs safe cleanup and repair steps automatically.",
+            accent=True,
+            width=220,
+        )
 
         grid = ctk.CTkFrame(self.main_area, fg_color="transparent")
         grid.pack(fill="x")
@@ -424,11 +453,12 @@ class App(ctk.CTk):
         GothicButton(actions, text="Flush DNS", command=self.cmd_flush_dns).pack(side="left", fill="x", expand=True, padx=(0, 6))
         GothicButton(actions, text="Optimize RAM", command=self.cmd_optimize_ram).pack(side="left", fill="x", expand=True, padx=(6, 6))
         GothicButton(actions, text="Purge Temp", command=self.cmd_purge_temp).pack(side="left", fill="x", expand=True, padx=(6, 0))
+        self.help_text(self.main_area, "Flush DNS clears stale name lookups. Optimize RAM frees unused memory. Purge Temp removes temporary files.")
 
     def show_tweaks(self):
         self.set_active_nav("tweaks")
         self.clear_main()
-        self.add_header("SYSTEM TWEAKS", "Apply high-impact optimizations")
+        self.add_header("System Tweaks", "Toggle high impact Windows optimizations one at a time.")
         cfg = core.load_config()
         body = ctk.CTkScrollableFrame(self.main_area, fg_color="transparent")
         body.pack(fill="both", expand=True, pady=(0, 10))
@@ -522,19 +552,29 @@ class App(ctk.CTk):
                    warn_text="Policies apply to managed Chrome instances; restart Chrome after change.")
         
         ctk.CTkLabel(body, text="ONE-CLICK PRESETS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(18, 6))
-        GothicButton(body, text="⚡ APPLY GENERAL WINDOWS OPTIMIZATIONS", command=lambda: self.run_threaded(core.apply_general_optimizations, "APPLYING GENERAL OPTIMIZATIONS...")).pack(fill="x", padx=2, pady=(0, 12))
+        self.action_block(body, text="Apply General Windows Optimizations",
+            command=lambda: self.run_threaded(core.apply_general_optimizations, "Applying general optimizations..."),
+            help="Runs a bundled set of safe performance tweaks in one step.")
         ctk.CTkLabel(body, text="RECOVERY & REPAIR", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(10, 6))
-        GothicButton(body, text="🛡️ CREATE RESTORE POINT", command=lambda: self.run_threaded(core.create_restore_point, "CREATING RESTORE POINT...")).pack(fill="x", padx=2, pady=4)
-        GothicButton(body, text="🧰 RUN SFC /SCANNOW", command=lambda: self.run_threaded(core.run_sfc, "RUNNING SFC...")).pack(fill="x", padx=2, pady=4)
-        GothicButton(body, text="🩺 RUN DISM RESTOREHEALTH", command=lambda: self.run_threaded(core.run_dism_restorehealth, "RUNNING DISM...")).pack(fill="x", padx=2, pady=4)
+        self.action_block(body, text="Create Restore Point",
+            command=lambda: self.run_threaded(core.create_restore_point, "Creating restore point..."),
+            help="Saves a Windows restore point before you apply aggressive changes.")
+        self.action_block(body, text="Run SFC /SCANNOW",
+            command=lambda: self.run_threaded(core.run_sfc, "Running SFC scan..."),
+            help="Scans and repairs protected system files.")
+        self.action_block(body, text="Run DISM RestoreHealth",
+            command=lambda: self.run_threaded(core.run_dism_restorehealth, "Running DISM repair..."),
+            help="Repairs the Windows image when SFC alone is not enough.")
         ctk.CTkLabel(body, text="SETTINGS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(12, 6))
-        GothicButton(body, text="📦 EXPORT SETTINGS TO DESKTOP", command=lambda: self.run_threaded(core.export_settings_to_desktop, "EXPORTING SETTINGS...")).pack(fill="x", padx=2, pady=(0, 12))
+        self.action_block(body, text="Export Settings to Desktop",
+            command=lambda: self.run_threaded(core.export_settings_to_desktop, "Exporting settings..."),
+            help="Saves your PCFIX toggle states to a file on your Desktop.")
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_cleaner(self):
         self.set_active_nav("cleaner")
         self.clear_main()
-        self.add_header("CLEANING PROTOCOLS", "Free up space and remove junk")
+        self.add_header("Cleaner", "Free up disk space and trim background services.")
         cfg = core.load_config()
         body = ctk.CTkScrollableFrame(self.main_area, fg_color="transparent")
         body.pack(fill="both", expand=True, pady=(0, 10))
@@ -542,8 +582,10 @@ class App(ctk.CTk):
         def add_switch(parent, text, key, on_func, off_func, desc, warn_text=None):
             self.add_config_switch(parent, cfg, text, key, on_func, off_func, desc, warn_text)
 
-        GothicButton(body, text="🗑️ PURGE TEMP FILES", command=self.cmd_purge_temp).pack(fill="x", pady=5)
-        GothicButton(body, text="♻️ EMPTY RECYCLE BIN", command=self.cmd_recycle_bin).pack(fill="x", pady=5)
+        self.action_block(body, text="Purge Temp Files", command=self.cmd_purge_temp,
+            help="Deletes files from Windows and user temp folders.")
+        self.action_block(body, text="Empty Recycle Bin", command=self.cmd_recycle_bin,
+            help="Permanently removes everything currently in the Recycle Bin.")
         ctk.CTkLabel(body, text="VISIBILITY & EXPLORER", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(16, 8))
         add_switch(body, "Show File Extensions", "tweak_show_ext", core.show_file_extensions, core.hide_file_extensions, "Displays file extensions in Explorer.")
         add_switch(body, "Show Hidden Files", "tweak_show_hidden", core.show_hidden_files, core.hide_hidden_files, "Shows hidden and system files in Explorer.", warn_text="Editing system files can be risky.")
@@ -555,13 +597,17 @@ class App(ctk.CTk):
         add_switch(body, "Disable Auto-Reboot After Update", "tweak_update_reboot", core.disable_auto_reboot_update, core.enable_auto_reboot_update, "Prevents forced reboots when a user is logged in.")
         frame_net = ctk.CTkFrame(body, fg_color="transparent")
         frame_net.pack(fill="x", pady=(8, 0))
-        GothicButton(frame_net, text="🧹 FLUSH DNS", command=lambda: self.run_threaded(core.flush_dns, "FLUSHING DNS...")).pack(side="left", fill="x", expand=True, padx=(0, 6))
-        GothicButton(frame_net, text="🔄 RESET WINSOCK", command=lambda: self.run_threaded(core.reset_winsock, "RESETTING WINSOCK...")).pack(side="left", fill="x", expand=True)
+        GothicButton(frame_net, text="Flush DNS", command=lambda: self.run_threaded(core.flush_dns, "Flushing DNS...")).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        GothicButton(frame_net, text="Reset Winsock", command=lambda: self.run_threaded(core.reset_winsock, "Resetting Winsock...")).pack(side="left", fill="x", expand=True)
+        self.help_text(body, "Flush DNS clears cached lookups. Reset Winsock repairs the network stack after connectivity issues.")
         frame_dns = ctk.CTkFrame(body, fg_color="transparent")
-        frame_dns.pack(fill="x", pady=(8, 12))
-        GothicButton(frame_dns, text="🌐 SET DNS: CLOUDFLARE", command=lambda: self.run_threaded(core.set_dns_cloudflare, "SETTING DNS TO CLOUDFLARE...")).pack(side="left", fill="x", expand=True, padx=(0, 6))
-        GothicButton(frame_dns, text="🌐 RESTORE DNS: DHCP", command=lambda: self.run_threaded(core.restore_dns_dhcp, "RESTORING DNS TO DHCP...")).pack(side="left", fill="x", expand=True)
-        GothicButton(body, text="🧼 CLEAR WINDOWS UPDATE CACHE", command=lambda: self.run_threaded(core.clear_windows_update_cache, "CLEARING UPDATE CACHE...")).pack(fill="x", pady=(8, 12))
+        frame_dns.pack(fill="x", pady=(8, 0))
+        GothicButton(frame_dns, text="Set DNS: Cloudflare", command=lambda: self.run_threaded(core.set_dns_cloudflare, "Setting DNS to Cloudflare...")).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        GothicButton(frame_dns, text="Restore DNS: DHCP", command=lambda: self.run_threaded(core.restore_dns_dhcp, "Restoring DNS to DHCP...")).pack(side="left", fill="x", expand=True)
+        self.help_text(body, "Cloudflare DNS (1.1.1.1) can improve speed and privacy. Restore DHCP to let your router assign DNS again.")
+        self.action_block(body, text="Clear Windows Update Cache",
+            command=lambda: self.run_threaded(core.clear_windows_update_cache, "Clearing update cache..."),
+            help="Removes stuck update files when Windows Update fails to install.")
         ctk.CTkLabel(body, text="SERVICES & APP BEHAVIOR", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(16, 8))
         add_switch(body, "Disable Search Indexing", "tweak_search_index", core.disable_search_index, core.enable_search_index, "Disables Windows Search indexing to reduce disk usage.", warn_text="Search performance may be slower.")
         add_switch(body, "Disable SysMain", "tweak_sysmain", core.disable_sysmain, core.enable_sysmain, "Stops SysMain service to reduce background disk activity.", warn_text="App launch prefetch may be reduced.")
@@ -569,7 +615,9 @@ class App(ctk.CTk):
         add_switch(body, "Disable Print Spooler", "tweak_spooler", core.disable_print_spooler, core.enable_print_spooler, "Turns off printing service to reduce attack surface.", warn_text="Printing will not work while disabled.")
         add_switch(body, "Disable Remote Assistance", "tweak_remote_assist", core.disable_remote_assistance, core.enable_remote_assistance, "Blocks Windows Remote Assistance connections.")
         add_switch(body, "Disable OneDrive Sync", "tweak_onedrive", core.disable_onedrive, core.enable_onedrive, "Prevents OneDrive syncing via policy.", warn_text="OneDrive features will be unavailable.")
-        GothicButton(body, text="🛍️ RESET MICROSOFT STORE CACHE", command=lambda: self.run_threaded(core.reset_store_cache, "RESETTING STORE CACHE...")).pack(fill="x", pady=(8, 12))
+        self.action_block(body, text="Reset Microsoft Store Cache",
+            command=lambda: self.run_threaded(core.reset_store_cache, "Resetting Store cache..."),
+            help="Fixes Store app download and login problems by clearing its cache.")
         ctk.CTkLabel(body, text="PRIVACY", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(16, 8))
         add_switch(body, "Disable Advertising ID", "tweak_ad_id", core.disable_ad_id, core.enable_ad_id, "Stops apps using Advertising ID.")
         add_switch(body, "Disable Activity History", "tweak_activity", core.disable_activity_history, core.enable_activity_history, "Stops Windows from collecting activity history.")
@@ -606,54 +654,66 @@ class App(ctk.CTk):
         add_switch(body, "Disable Mouse Acceleration", "tweak_mouse_accel", core.disable_mouse_accel, core.enable_mouse_accel, "Sets raw mouse input without acceleration.")
         ctk.CTkLabel(body, text="REMOTE ACCESS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(16, 8))
         add_switch(body, "Disable Remote Desktop", "tweak_remote", core.disable_remote_desktop, core.enable_remote_desktop, "Prevents Remote Desktop connections.", warn_text="Remote access will be blocked.")
-        GothicButton(body, text="🔓 UNLOCKER (FORCE DELETE)", command=self.show_shredder).pack(fill="x", pady=5)
+        self.action_block(body, text="Open File Unlocker", command=self.show_shredder,
+            help="Force delete files that Windows refuses to remove.")
         
         # Chrome/Edge Killer
         ctk.CTkLabel(body, text="PROCESS TERMINATION", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(30, 10))
         
         frame = ctk.CTkFrame(body, fg_color="transparent")
         frame.pack(fill="x")
-        GothicButton(frame, text="💀 KILL CHROME", command=lambda: self.cmd_kill("chrome")).pack(side="left", fill="x", expand=True, padx=(0, 5))
-        GothicButton(frame, text="💀 KILL EDGE", command=lambda: self.cmd_kill("msedge")).pack(side="left", fill="x", expand=True, padx=(5, 0))
+        GothicButton(frame, text="Kill Chrome", command=lambda: self.cmd_kill("chrome")).pack(side="left", fill="x", expand=True, padx=(0, 5))
+        GothicButton(frame, text="Kill Edge", command=lambda: self.cmd_kill("msedge")).pack(side="left", fill="x", expand=True, padx=(5, 0))
+        self.help_text(body, "Ends all Chrome or Edge processes when a browser hangs or blocks file deletion.")
 
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_repair(self):
         self.set_active_nav("repair")
         self.clear_main()
-        self.add_header("ADVANCED REPAIR", "Fix system corruptions and errors")
+        self.add_header("Advanced Repair", "Fix corrupted files, images, and network stack issues.")
         
-        ctk.CTkLabel(self.main_area, text="⚠️ Operations may take several minutes to complete.", font=(FONT_MAIN, 12), text_color=COLOR_ACCENT).pack(anchor="w", pady=(0, 10))
+        ctk.CTkLabel(self.main_area, text="These operations may take several minutes. Do not close PCFIX while they run.",
+                     font=(FONT_MAIN, 12), text_color=COLOR_ACCENT).pack(anchor="w", pady=(0, 10))
 
-        GothicButton(self.main_area, text="🩺 SYSTEM FILE CHECK (SFC)", command=lambda: self.run_threaded(core.run_sfc, "SFC SCANNING...")).pack(fill="x", pady=5)
-        GothicButton(self.main_area, text="🚑 REPAIR WINDOWS IMAGE (DISM)", command=lambda: self.run_threaded(core.run_dism, "DISM REPAIRING...")).pack(fill="x", pady=5)
-        GothicButton(self.main_area, text="🔌 RESET NETWORK STACK", command=lambda: self.run_threaded(core.reset_network, "RESETTING NETWORK...")).pack(fill="x", pady=5)
-        GothicButton(self.main_area, text="💿 SCHEDULE DISK CHECK (RESTART)", command=lambda: self.run_threaded(core.check_disk_schedule, "SCHEDULING CHKDSK...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="System File Check (SFC)",
+            command=lambda: self.run_threaded(core.run_sfc, "Running SFC scan..."),
+            help="Scans and repairs protected Windows system files.")
+        self.action_block(self.main_area, text="Repair Windows Image (DISM)",
+            command=lambda: self.run_threaded(core.run_dism, "Running DISM repair..."),
+            help="Restores the Windows component store when SFC cannot fix errors.")
+        self.action_block(self.main_area, text="Reset Network Stack",
+            command=lambda: self.run_threaded(core.reset_network, "Resetting network stack..."),
+            help="Resets TCP/IP, Winsock, and related settings after network failures.")
+        self.action_block(self.main_area, text="Schedule Disk Check (Restart)",
+            command=lambda: self.run_threaded(core.check_disk_schedule, "Scheduling disk check..."),
+            help="Schedules CHKDSK on the next restart to scan the system drive for errors.")
         
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_shredder(self):
          self.set_active_nav("unlocker")
          self.clear_main()
-         self.add_header("FILE UNLOCKER", "Force delete stubborn files")
-         
-         ctk.CTkLabel(self.main_area, text="Select a file that cannot be deleted normally.", font=(FONT_MAIN, 12), text_color=COLOR_DIM).pack(anchor="w", pady=(0, 20))
+         self.add_header("File Unlocker", "Force delete files that are locked or in use.")
          
          def _shred():
              path = filedialog.askopenfilename()
              if path:
-                 self.run_threaded(lambda: core.force_delete_file(path), "UNLOCKING & DELETING...")
+                 self.run_threaded(lambda: core.force_delete_file(path), "Unlocking and deleting file...")
          
-         AccentButton(self.main_area, text="📂 SELECT FILE TO DESTROY", command=_shred).pack(fill="x", pady=10)
+         self.action_block(self.main_area, text="Select File to Delete", command=_shred,
+             help="Pick a stubborn file. PCFIX unlocks handles and removes it.",
+             accent=True)
          
          ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_force_remove_app(self):
         self.set_active_nav("force_remove")
         self.clear_main()
-        self.add_header("FORCE REMOVE APP", "Detect and quarantine-remove application files")
+        self.add_header("Force Remove App", "Find leftover files and registry entries for an app name.")
+        self.help_text(self.main_area, "Enter part of the app name, then scan. Delete moves items to quarantine so you can restore later.")
         name_var = tk.StringVar()
-        entry = ctk.CTkEntry(self.main_area, textvariable=name_var)
+        entry = ctk.CTkEntry(self.main_area, textvariable=name_var, placeholder_text="App name, e.g. ExampleApp")
         entry.pack(fill="x", pady=(0, 8))
         actions = ctk.CTkFrame(self.main_area, fg_color="transparent")
         actions.pack(fill="x", pady=(0, 8))
@@ -670,43 +730,49 @@ class App(ctk.CTk):
                 row.pack(fill="x", pady=2)
                 ctk.CTkLabel(row, text=p, font=(FONT_MONO, 11), text_color=COLOR_TEXT).pack(anchor="w", padx=8)
         def _scan():
-            self.status_msg.set("SCANNING...")
+            self.status_msg.set("Scanning for app artifacts...")
             def run():
                 items = core.find_application_artifacts(name_var.get().strip(), include_processes=True)
                 def _done():
-                    self.status_msg.set(f"FOUND {len(items)} ITEMS")
+                    self.status_msg.set(f"Done. Found {len(items)} item(s).")
                     _render_list(items)
                 self.ui_enqueue(_done)
             threading.Thread(target=run, daemon=True).start()
         def _delete():
-            self.status_msg.set("DELETING (QUARANTINE)...")
+            self.status_msg.set("Moving artifacts to quarantine...")
             def run():
                 res = core.confirm_and_delete_app(name_var.get().strip(), auto_confirm=True, threads=6)
-                self.ui_enqueue(self.status_msg.set, f"{res.get('status','OK')}: moved={res.get('moved',0)} deleted={res.get('deleted',0)} scheduled={res.get('scheduled',0)} errors={res.get('errors',0)}")
+                self.ui_enqueue(self.status_msg.set,
+                    f"Done. Moved {res.get('moved', 0)}, deleted {res.get('deleted', 0)}, "
+                    f"scheduled {res.get('scheduled', 0)}, errors {res.get('errors', 0)}.")
             threading.Thread(target=run, daemon=True).start()
         def _restore():
-            self.status_msg.set("RESTORING...")
+            self.status_msg.set("Restoring from quarantine...")
             def run():
                 r = core.restore_quarantine()
-                self.ui_enqueue(self.status_msg.set, f"RESTORE: {r.get('status','?')} restored={r.get('restored',0)} errors={r.get('errors',0)}")
+                self.ui_enqueue(self.status_msg.set,
+                    f"Done. Restored {r.get('restored', 0)} item(s), errors {r.get('errors', 0)}.")
             threading.Thread(target=run, daemon=True).start()
-        GothicButton(actions, text="🔎 SCAN ARTIFACTS", command=_scan).pack(side="left", fill="x", expand=True, padx=(0, 6))
-        GothicButton(actions, text="🗑 DELETE ALL (QUARANTINE)", command=_delete).pack(side="left", fill="x", expand=True, padx=(6, 6))
-        GothicButton(actions, text="↩ RESTORE LAST", command=_restore).pack(side="left", fill="x", expand=True, padx=(6, 0))
+        GothicButton(actions, text="Scan Artifacts", command=_scan).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        GothicButton(actions, text="Delete All (Quarantine)", command=_delete).pack(side="left", fill="x", expand=True, padx=(6, 6))
+        GothicButton(actions, text="Restore Last", command=_restore).pack(side="left", fill="x", expand=True, padx=(6, 0))
+        self.help_text(self.main_area, "Scan lists files and keys. Delete All quarantines matches. Restore Last undoes the last quarantine.")
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
     def show_debloater(self): # Renamed logic
         self.set_active_nav("debloater")
         self.clear_main()
-        self.add_header("SYSTEM DEBLOATER", "Remove pre-installed bloatware")
+        self.add_header("System Debloater", "Detect and remove common pre-installed Windows apps.")
 
-        # Scan Button
-        AccentButton(self.main_area, text="🔎 SCAN FOR BLOATWARE", command=lambda: self.scan_bloatware(results_frame)).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Scan for Bloatware",
+            command=lambda: self.scan_bloatware(results_frame),
+            help="Lists third party and bundled apps that are safe to remove for most users.",
+            accent=True)
 
         # Results Area
         results_frame = ctk.CTkScrollableFrame(self.main_area, fg_color=COLOR_SURFACE, height=300, border_color=COLOR_BORDER, border_width=1)
         results_frame.pack(fill="x", pady=20)
         
-        ctk.CTkLabel(results_frame, text="Click SCAN to detect bloatware...", font=(FONT_MONO, 12), text_color=COLOR_DIM).pack(pady=20)
+        ctk.CTkLabel(results_frame, text="Click Scan to detect bloatware.", font=(FONT_MONO, 12), text_color=COLOR_DIM).pack(pady=20)
 
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
@@ -714,7 +780,7 @@ class App(ctk.CTk):
         for widget in frame.winfo_children():
             widget.destroy()
             
-        self.status_msg.set("SCANNING APPS...")
+        self.status_msg.set("Scanning installed apps...")
         
         def _scan():
             apps = core.get_installed_bloatware()
@@ -729,14 +795,14 @@ class App(ctk.CTk):
                         row.pack(fill="x", pady=2)
                         ctk.CTkLabel(row, text=app, font=(FONT_MONO, 12), text_color=COLOR_TEXT).pack(side="left", padx=10)
                         GothicButton(row, text="REMOVE", width=80, height=30, command=lambda a=app, r=row: self.remove_app(a, r)).pack(side="right", padx=10, pady=5)
-                self.status_msg.set("SCAN COMPLETE")
+                self.status_msg.set("Done. Scan complete.")
 
             self.ui_enqueue(_render)
             
         threading.Thread(target=_scan, daemon=True).start()
 
     def remove_app(self, app_name, row_widget):
-        self.status_msg.set(f"REMOVING {app_name}...")
+        self.status_msg.set(f"Removing {app_name}...")
         def _rem():
             res = core.remove_bloatware(app_name)
             def _done():
@@ -748,35 +814,41 @@ class App(ctk.CTk):
     def show_privacy(self):
         self.set_active_nav("privacy")
         self.clear_main()
-        self.add_header("PRIVACY SHIELD", "Block telemetry and tracking")
+        self.add_header("Privacy Shield", "Reduce telemetry, ads, and tracking across Windows.")
         
         ctk.CTkLabel(self.main_area, text="TELEMETRY & TRACKING", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(10, 5))
-        GothicButton(self.main_area, text="🛡️ DISABLE WINDOWS TELEMETRY", command=lambda: self.run_threaded(core.apply_privacy_shield, "APPLYING PRIVACY SHIELD...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Disable Windows Telemetry",
+            command=lambda: self.run_threaded(core.apply_privacy_shield, "Applying privacy shield..."),
+            help="Applies a bundled set of registry and policy changes to limit diagnostic data.")
 
         ctk.CTkLabel(self.main_area, text="ADVANCED TOOLS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
-        GothicButton(self.main_area, text="👼 ENABLE 'GOD MODE' (DESKTOP)", command=lambda: self.run_threaded(core.create_god_mode, "CREATING GOD MODE...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Enable God Mode on Desktop",
+            command=lambda: self.run_threaded(core.create_god_mode, "Creating God Mode folder..."),
+            help="Adds a Desktop folder with shortcuts to nearly every Windows setting.")
         
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_bsod(self):
         self.set_active_nav("bsod")
         self.clear_main()
-        self.add_header("BSOD ANALYZER", "Interpret crash dumps")
+        self.add_header("BSOD Analyzer", "Review crash history and run targeted fixes.")
         
-        # Advanced analysis actions
         actions = ctk.CTkFrame(self.main_area, fg_color="transparent")
-        actions.pack(fill="x", pady=(0, 10))
+        actions.pack(fill="x", pady=(0, 4))
         def _pick_and_analyze():
             file_path = filedialog.askopenfilename(title="Select a Windows dump file",
                                                    filetypes=[("Dump files", "*.dmp;*.mdmp;*.hdmp;*.dmp"), ("All files", "*.*")])
             if file_path:
-                self.run_threaded(lambda: core.analyze_dump_file(file_path, timeout=30, open_report=True, sanitize=True), "ANALYZING DUMP...")
-        GothicButton(actions, text="🧠 ANALYZE DUMP FILE (ADVANCED)", command=_pick_and_analyze).pack(side="left", fill="x", expand=True, padx=(0, 6))
-        GothicButton(actions, text="⚡ REAL-TIME ANALYZE LATEST DUMP", command=lambda: self.run_threaded(core.analyze_latest_dump_realtime, "ANALYZING LATEST DUMP...")).pack(side="left", fill="x", expand=True)
+                self.run_threaded(lambda: core.analyze_dump_file(file_path, timeout=30, open_report=True, sanitize=True), "Analyzing dump file...")
+        GothicButton(actions, text="Analyze Dump File", command=_pick_and_analyze).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        GothicButton(actions, text="Analyze Latest Dump", command=lambda: self.run_threaded(core.analyze_latest_dump_realtime, "Analyzing latest dump...")).pack(side="left", fill="x", expand=True)
+        self.help_text(self.main_area, "Pick a .dmp file for deep analysis, or analyze the most recent crash dump automatically.")
         
         ctk.CTkLabel(self.main_area, text="RECENT CRASH HISTORY", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(10, 5))
         
-        AccentButton(self.main_area, text="🔍 SCAN BSOD LOGS", command=self.show_bsod).pack(fill="x", pady=(0, 10))
+        self.action_block(self.main_area, text="Refresh BSOD Logs", command=self.show_bsod,
+            help="Reloads the list of recent blue screen events from the system log.",
+            accent=True)
         
         try:
             crashes = core.get_bsod_history()
@@ -826,8 +898,12 @@ class App(ctk.CTk):
         btn_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
         btn_frame.pack(fill="x")
         
-        GothicButton(btn_frame, text="🧠 RUN MEMORY DIAGNOSTIC (RESTART)", command=lambda: self.run_threaded(core.run_memory_diagnostic, "LAUNCHING MEMORY TOOL...")).pack(fill="x", pady=5)
-        GothicButton(btn_frame, text="💾 SCAN DISK FOR ERRORS (CHKDSK)", command=lambda: self.run_threaded(core.run_chkdsk_scan, "RUNNING CHKDSK...")).pack(fill="x", pady=5)
+        self.action_block(btn_frame, text="Run Memory Diagnostic (Restart)",
+            command=lambda: self.run_threaded(core.run_memory_diagnostic, "Launching memory diagnostic..."),
+            help="Schedules Windows Memory Diagnostic on the next restart.")
+        self.action_block(btn_frame, text="Scan Disk for Errors (CHKDSK)",
+            command=lambda: self.run_threaded(core.run_chkdsk_scan, "Running disk check..."),
+            help="Checks the system drive for file system and bad sector issues.")
         
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
@@ -859,27 +935,22 @@ class App(ctk.CTk):
             ctk.CTkLabel(msg_frame, text=message, font=(FONT_MONO, 10), text_color=COLOR_TEXT, justify="left", anchor="w").pack(fill="x", padx=6, pady=4)
 
         button_frame = ctk.CTkFrame(container, fg_color="transparent")
-        button_frame.pack(fill="x", padx=10, pady=(10, 10))
+        button_frame.pack(fill="x", padx=10, pady=(10, 4))
 
-        GothicButton(button_frame, text="🧬 RUN SFC /SCANNOW", command=lambda: self.run_threaded(core.run_sfc, "RUNNING SFC /SCANNOW...")).pack(side="left", fill="x", expand=True, padx=(0, 5))
-        GothicButton(button_frame, text="🩺 RUN DISM HEALTH CHECK", command=lambda: self.run_threaded(core.run_dism, "RUNNING DISM /RESTOREHEALTH...")).pack(side="left", fill="x", expand=True, padx=5)
-        GothicButton(button_frame, text="🧾 OPEN MINIDUMP FOLDER", command=lambda: self.run_threaded(core.open_minidump_folder, "OPENING MINIDUMP FOLDER...")).pack(side="left", fill="x", expand=True, padx=5)
-        GothicButton(button_frame, text="📤 EXPORT BSOD REPORT", command=lambda: self.run_threaded(core.export_bsod_report, "EXPORTING BSOD REPORT...")).pack(side="left", fill="x", expand=True, padx=(5, 0))
+        GothicButton(button_frame, text="Run SFC /SCANNOW", command=lambda: self.run_threaded(core.run_sfc, "Running SFC scan...")).pack(side="left", fill="x", expand=True, padx=(0, 5))
+        GothicButton(button_frame, text="Run DISM Health Check", command=lambda: self.run_threaded(core.run_dism, "Running DISM repair...")).pack(side="left", fill="x", expand=True, padx=5)
+        GothicButton(button_frame, text="Open Minidump Folder", command=lambda: self.run_threaded(core.open_minidump_folder, "Opening minidump folder...")).pack(side="left", fill="x", expand=True, padx=5)
+        GothicButton(button_frame, text="Export BSOD Report", command=lambda: self.run_threaded(core.export_bsod_report, "Exporting BSOD report...")).pack(side="left", fill="x", expand=True, padx=(5, 0))
         
         info = ctk.CTkFrame(container, fg_color="transparent")
-        info.pack(fill="x", padx=10, pady=(6, 2))
-        ctk.CTkLabel(info, text="What these actions do:", font=(FONT_MAIN, 11, "bold"), text_color=COLOR_DIM).pack(anchor="w")
-        ctk.CTkLabel(info, text="• SFC scans and repairs protected system files.", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(anchor="w")
-        ctk.CTkLabel(info, text="• DISM restores the Windows image when SFC isn’t enough.", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(anchor="w")
-        ctk.CTkLabel(info, text="• Minidump folder opens crash dump files for advanced analysis.", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(anchor="w")
-        ctk.CTkLabel(info, text="• Export report saves a text summary to your Desktop.", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(anchor="w")
+        info.pack(fill="x", padx=10, pady=(2, 10))
+        self.help_text(info, "SFC repairs system files. DISM fixes the Windows image. Minidump opens crash files. Export saves a text report to Desktop.")
 
     def show_settings(self):
         self.set_active_nav("settings")
         self.clear_main()
-        self.add_header("SETTINGS", "Configuration")
+        self.add_header("Settings", "Customize sounds, tray behavior, and background automation.")
 
-        # Sound Section
         ctk.CTkLabel(self.main_area, text="STARTUP SOUND", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(10, 5))
         
         config = core.load_config()
@@ -897,22 +968,23 @@ class App(ctk.CTk):
                 self.lbl_sound_path.configure(text=file_path)
                 config["startup_sound"] = file_path
                 if core.save_config(config):
-                    self.status_msg.set("SOUND SAVED")
+                    self.status_msg.set("Done. Startup sound saved.")
                 else:
-                    self.status_msg.set("ERROR SAVING CONFIG")
+                    self.status_msg.set("Error saving config.")
 
         def _clear_sound():
             self.lbl_sound_path.configure(text="Default (Cyberpunk Beep)")
             config["startup_sound"] = ""
             core.save_config(config)
-            self.status_msg.set("SOUND RESET TO DEFAULT")
+            self.status_msg.set("Done. Sound reset to default.")
 
-        GothicButton(sound_frame, text="📂 BROWSE...", width=100, command=_browse_sound).pack(side="right", padx=5)
-        GothicButton(sound_frame, text="🔄 RESET", width=80, fg_color=COLOR_BORDER, command=_clear_sound).pack(side="right", padx=5)
+        GothicButton(sound_frame, text="Browse", width=100, command=_browse_sound).pack(side="right", padx=5)
+        GothicButton(sound_frame, text="Reset", width=80, fg_color=COLOR_BORDER, command=_clear_sound).pack(side="right", padx=5)
+        self.help_text(self.main_area, "Choose a .wav file played when PCFIX starts, or reset to the built in beep.")
         
-        GothicButton(self.main_area, text="🔊 TEST PLAY SOUND", command=core.play_startup_sound).pack(fill="x", pady=20)
+        self.action_block(self.main_area, text="Test Play Sound", command=core.play_startup_sound,
+            help="Plays the current startup sound so you can preview it.")
 
-        # Background Section
         ctk.CTkLabel(self.main_area, text="BACKGROUND MODE", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
         
         bg_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
@@ -923,14 +995,14 @@ class App(ctk.CTk):
         def _toggle_tray():
             self.config["minimize_to_tray"] = self.var_tray.get()
             if core.save_config(self.config):
-                self.status_msg.set("SETTING SAVED")
+                self.status_msg.set("Done. Tray setting saved.")
             else:
-                self.status_msg.set("ERROR SAVING CONFIG")
+                self.status_msg.set("Error saving config.")
             
-        ctk.CTkSwitch(bg_frame, text="MINIMIZE TO TRAY ON CLOSE", variable=self.var_tray, command=_toggle_tray, 
+        ctk.CTkSwitch(bg_frame, text="Minimize to tray on close", variable=self.var_tray, command=_toggle_tray, 
                       progress_color=COLOR_ACCENT, fg_color=COLOR_BORDER).pack(anchor="w")
+        self.help_text(self.main_area, "When enabled, closing the window hides PCFIX in the system tray instead of exiting.")
 
-        # Auto RAM Optimize Section
         ctk.CTkLabel(self.main_area, text="AUTOMATION", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
         
         auto_ram_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
@@ -940,24 +1012,28 @@ class App(ctk.CTk):
         def _toggle_auto_ram():
             self.config["auto_ram"] = self.var_auto_ram.get()
             if core.save_config(self.config):
-                self.status_msg.set("AUTO RAM SAVED")
+                self.status_msg.set("Done. Auto RAM setting saved.")
             else:
-                self.status_msg.set("ERROR SAVING CONFIG")
-        ctk.CTkSwitch(auto_ram_frame, text="AUTO OPTIMIZE RAM (EVERY 30 MINS)", variable=self.var_auto_ram, command=_toggle_auto_ram, 
+                self.status_msg.set("Error saving config.")
+        ctk.CTkSwitch(auto_ram_frame, text="Auto optimize RAM every 30 minutes", variable=self.var_auto_ram, command=_toggle_auto_ram, 
                       progress_color=COLOR_ACCENT, fg_color=COLOR_BORDER).pack(anchor="w")
+        self.help_text(self.main_area, "Frees unused memory in the background while PCFIX is running.")
 
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_about(self):
         self.set_active_nav("about")
         self.clear_main()
+        self.add_header("About PCFIX", "All in one Windows cleanup, repair, and tuning toolkit.")
         card = ctk.CTkFrame(self.main_area, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=1, corner_radius=14)
-        card.pack(fill="x", pady=(20, 0))
+        card.pack(fill="x", pady=(0, 0))
         inner = ctk.CTkFrame(card, fg_color="transparent")
         inner.pack(fill="x", padx=28, pady=32)
         ctk.CTkLabel(inner, text=f"PCFIX {APP_VERSION}", font=(FONT_DISPLAY, 34, "bold"), text_color=COLOR_ACCENT).pack(anchor="w")
         ctk.CTkLabel(inner, text="NECROMANCER  ·  ALL-IN-ONE WINDOWS TOOLKIT", font=(FONT_MONO, 12), text_color=COLOR_DIM).pack(anchor="w", pady=(6, 16))
-        desc = ("Clean, repair, tweak, and diagnose Windows from a single dark UI.\n"
+        desc = ("PCFIX changes Windows settings, services, and policies to improve performance and privacy.\n"
+                "Before aggressive tweaks, create a restore point from the Tweaks screen.\n\n"
+                "Clean, repair, tweak, and diagnose Windows from a single dark UI.\n"
                 "Debloat, privacy shield, network tools, and BSOD analysis included.")
         ctk.CTkLabel(inner, text=desc, font=(FONT_MAIN, 13), text_color=COLOR_TEXT, justify="left").pack(anchor="w")
         ctk.CTkLabel(inner, text="Developer  ·  DARKSIDE957", font=(FONT_MAIN, 13, "bold"), text_color=COLOR_TEXT).pack(anchor="w", pady=(22, 2))
@@ -967,18 +1043,26 @@ class App(ctk.CTk):
             import webbrowser
             webbrowser.open("https://github.com/DARKSIDE957/PCfix")
 
-        GothicButton(inner, text="Open GitHub", command=open_link, width=180).pack(anchor="w", pady=(20, 0))
+        self.action_block(inner, text="Open GitHub", command=open_link, help="View source, releases, and documentation online.", width=180)
         ctk.CTkLabel(self.main_area, text="© 2026 DARKSIDE957", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(side="bottom", pady=16)
 
     def show_boost(self):
         self.set_active_nav("boost")
         self.clear_main()
-        self.add_header("PERFORMANCE BOOST", "Maximize system speed")
+        self.add_header("Performance Boost", "Apply fast, high impact speed optimizations in one click.")
         
-        GothicButton(self.main_area, text="🚀 ENABLE HIGH PERFORMANCE PLAN", command=lambda: self.run_threaded(core.enable_ultimate_performance, "ACTIVATING POWER PLAN...")).pack(fill="x", pady=5)
-        GothicButton(self.main_area, text="💤 DISABLE HIBERNATION", command=lambda: self.run_threaded(core.disable_hibernation, "DISABLING HIBERNATION...")).pack(fill="x", pady=5)
-        GothicButton(self.main_area, text="✨ OPTIMIZE VISUAL EFFECTS", command=lambda: self.run_threaded(core.optimize_visual_fx, "TWEAKING REGISTRY...")).pack(fill="x", pady=5)
-        GothicButton(self.main_area, text="🎮 SET GPU HIGH PRIORITY", command=lambda: self.run_threaded(core.optimize_gpu_priority, "SETTING GPU PRIORITY...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Enable High Performance Plan",
+            command=lambda: self.run_threaded(core.enable_ultimate_performance, "Enabling high performance plan..."),
+            help="Switches Windows to the High Performance or Ultimate Performance power plan.")
+        self.action_block(self.main_area, text="Disable Hibernation",
+            command=lambda: self.run_threaded(core.disable_hibernation, "Disabling hibernation..."),
+            help="Turns off hibernate and frees disk space used by hiberfil.sys.")
+        self.action_block(self.main_area, text="Optimize Visual Effects",
+            command=lambda: self.run_threaded(core.optimize_visual_fx, "Optimizing visual effects..."),
+            help="Sets Windows for best performance by reducing animations and effects.")
+        self.action_block(self.main_area, text="Set GPU High Priority",
+            command=lambda: self.run_threaded(core.optimize_gpu_priority, "Setting GPU priority..."),
+            help="Raises GPU scheduling priority for smoother gaming and graphics work.")
 
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
@@ -1000,7 +1084,7 @@ class App(ctk.CTk):
     def show_info(self):
         self.set_active_nav("specs")
         self.clear_main()
-        self.add_header("SYSTEM SPECIFICATIONS", "Hardware details")
+        self.add_header("System Specifications", "Hardware and OS details for this PC.")
         
         info = core.get_detailed_info()
         
@@ -1018,51 +1102,54 @@ class App(ctk.CTk):
             ctk.CTkLabel(grid, text=info.get(key, "N/A"), font=(FONT_MONO, 12), text_color=COLOR_TEXT, wraplength=400, justify="left").grid(row=row, column=1, sticky="w", padx=20, pady=5)
             row += 1
 
-        # Export Button
-        GothicButton(self.main_area, text="💾 EXPORT SPECS TO FILE", command=lambda: self.run_threaded(core.export_system_info, "EXPORTING SPECS...")).pack(fill="x", pady=20)
+        self.action_block(self.main_area, text="Export Specs to File",
+            command=lambda: self.run_threaded(core.export_system_info, "Exporting system specs..."),
+            help="Saves CPU, GPU, RAM, and OS details to a text file on your Desktop.")
 
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_tools(self):
         self.set_active_nav("tools")
         self.clear_main()
-        self.add_header("SYSTEM TOOLS", "Utilities and tweaks")
+        self.add_header("System Tools", "DNS presets, gaming mode, and quick Windows utilities.")
         
-        # DNS Switcher
         ctk.CTkLabel(self.main_area, text="DNS CONFIGURATION", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(10, 5))
         dns_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
         dns_frame.pack(fill="x")
         
-        GothicButton(dns_frame, text="GOOGLE DNS", command=lambda: self.run_threaded(core.set_dns_google, "SETTING GOOGLE DNS...")).pack(side="left", fill="x", expand=True, padx=(0, 2))
-        GothicButton(dns_frame, text="CLOUDFLARE", command=lambda: self.run_threaded(core.set_dns_cloudflare, "SETTING CLOUDFLARE...")).pack(side="left", fill="x", expand=True, padx=2)
-        GothicButton(dns_frame, text="AUTO (ISP)", command=lambda: self.run_threaded(core.set_dns_auto, "RESETTING DNS...")).pack(side="left", fill="x", expand=True, padx=(2, 0))
+        GothicButton(dns_frame, text="Google DNS", command=lambda: self.run_threaded(core.set_dns_google, "Setting Google DNS...")).pack(side="left", fill="x", expand=True, padx=(0, 2))
+        GothicButton(dns_frame, text="Cloudflare", command=lambda: self.run_threaded(core.set_dns_cloudflare, "Setting Cloudflare DNS...")).pack(side="left", fill="x", expand=True, padx=2)
+        GothicButton(dns_frame, text="Auto (ISP)", command=lambda: self.run_threaded(core.set_dns_auto, "Restoring automatic DNS...")).pack(side="left", fill="x", expand=True, padx=(2, 0))
+        self.help_text(self.main_area, "Switch DNS servers for faster lookups. Auto restores your ISP defaults.")
         
-        # Gaming Mode
         ctk.CTkLabel(self.main_area, text="GAMING OPTIMIZATION", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
-        GothicButton(self.main_area, text="🎮 ACTIVATE GAMING MODE", command=lambda: self.run_threaded(core.gaming_mode_on, "KILLING BACKGROUND APPS...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Activate Gaming Mode",
+            command=lambda: self.run_threaded(core.gaming_mode_on, "Activating gaming mode..."),
+            help="Closes non essential background apps to free CPU and RAM for games.")
         
-        # Quick Launchers
         ctk.CTkLabel(self.main_area, text="QUICK ACCESS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
         
         tools_grid = ctk.CTkFrame(self.main_area, fg_color="transparent")
         tools_grid.pack(fill="x")
         tools_grid.columnconfigure((0, 1), weight=1)
         
-        GothicButton(tools_grid, text="TASK MANAGER", command=lambda: core.launch_tool("taskmgr")).grid(row=0, column=0, padx=(0, 5), pady=5, sticky="ew")
-        GothicButton(tools_grid, text="REGISTRY EDITOR", command=lambda: core.launch_tool("regedit")).grid(row=0, column=1, padx=(5, 0), pady=5, sticky="ew")
-        GothicButton(tools_grid, text="DEVICE MANAGER", command=lambda: core.launch_tool("devmgmt")).grid(row=1, column=0, padx=(0, 5), pady=5, sticky="ew")
-        GothicButton(tools_grid, text="CONTROL PANEL", command=lambda: core.launch_tool("control")).grid(row=1, column=1, padx=(5, 0), pady=5, sticky="ew")
+        GothicButton(tools_grid, text="Task Manager", command=lambda: core.launch_tool("taskmgr")).grid(row=0, column=0, padx=(0, 5), pady=5, sticky="ew")
+        GothicButton(tools_grid, text="Registry Editor", command=lambda: core.launch_tool("regedit")).grid(row=0, column=1, padx=(5, 0), pady=5, sticky="ew")
+        GothicButton(tools_grid, text="Device Manager", command=lambda: core.launch_tool("devmgmt")).grid(row=1, column=0, padx=(0, 5), pady=5, sticky="ew")
+        GothicButton(tools_grid, text="Control Panel", command=lambda: core.launch_tool("control")).grid(row=1, column=1, padx=(5, 0), pady=5, sticky="ew")
+        self.help_text(self.main_area, "Opens built in Windows tools without searching the Start menu.")
         
-        # Reports
         ctk.CTkLabel(self.main_area, text="REPORTS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
-        GothicButton(self.main_area, text="🔋 GENERATE BATTERY HEALTH REPORT", command=lambda: self.run_threaded(core.generate_battery_report, "GENERATING REPORT...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Generate Battery Health Report",
+            command=lambda: self.run_threaded(core.generate_battery_report, "Generating battery report..."),
+            help="Creates a detailed battery wear report (laptops only). Saved to your user folder.")
         
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
     def show_network(self):
         self.set_active_nav("network")
         self.clear_main()
-        self.add_header("NETWORK COMMANDER", "Latency and configuration")
+        self.add_header("Network Commander", "View adapter info, test latency, and reset connectivity.")
         
         self.net_info = core.get_network_info()
         self.net_hidden = True
@@ -1086,8 +1173,9 @@ class App(ctk.CTk):
             self.net_labels[key] = lbl
             
         # Toggle Button
-        self.btn_toggle_net = GothicButton(self.main_area, text="👁️ SHOW SENSITIVE DATA", width=180, height=30, command=self.toggle_network_details)
-        self.btn_toggle_net.pack(anchor="w", pady=(0, 20))
+        self.btn_toggle_net = GothicButton(self.main_area, text="Show Sensitive Data", width=180, height=30, command=self.toggle_network_details)
+        self.btn_toggle_net.pack(anchor="w", pady=(0, 4))
+        self.help_text(self.main_area, "Reveal or hide local IP, gateway, and MAC address on screen.")
             
         # Ping Test
         ctk.CTkLabel(self.main_area, text="LATENCY TESTS", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(10, 5))
@@ -1101,11 +1189,13 @@ class App(ctk.CTk):
         self.lbl_ping_cf = ctk.CTkLabel(ping_frame, text="CLOUDFLARE: ...", font=(FONT_MONO, 12), text_color=COLOR_TEXT)
         self.lbl_ping_cf.pack(side="left")
         
-        GothicButton(self.main_area, text="📶 RUN PING TEST", command=self.run_ping_check).pack(fill="x", pady=10)
+        self.action_block(self.main_area, text="Run Ping Test", command=self.run_ping_check,
+            help="Measures round trip time to Google (8.8.8.8) and Cloudflare (1.1.1.1).")
         
-        # Reset Adapter
         ctk.CTkLabel(self.main_area, text="ADAPTER CONTROL", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_DIM).pack(anchor="w", pady=(20, 5))
-        GothicButton(self.main_area, text="🔄 RESET ADAPTER (RESTART WI-FI)", command=lambda: self.run_threaded(lambda: core.reset_adapter(self.net_info.get('iface', 'Wi-Fi')), "RESETTING ADAPTER...")).pack(fill="x", pady=5)
+        self.action_block(self.main_area, text="Reset Adapter (Restart Wi-Fi)",
+            command=lambda: self.run_threaded(lambda: core.reset_adapter(self.net_info.get('iface', 'Wi-Fi')), "Resetting network adapter..."),
+            help="Disables and re-enables your active adapter to fix dropped connections.")
         
         ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
 
@@ -1113,18 +1203,19 @@ class App(ctk.CTk):
         self.net_hidden = not self.net_hidden
         
         if self.net_hidden:
-            self.btn_toggle_net.configure(text="👁️ SHOW SENSITIVE DATA")
+            self.btn_toggle_net.configure(text="Show Sensitive Data")
             for key, lbl in self.net_labels.items():
                 lbl.configure(text="* HIDDEN *")
         else:
-            self.btn_toggle_net.configure(text="🔒 HIDE SENSITIVE DATA")
+            self.btn_toggle_net.configure(text="Hide Sensitive Data")
             for key, lbl in self.net_labels.items():
                 lbl.configure(text=self.net_info.get(key, "N/A"))
 
     def show_startup(self):
         self.set_active_nav("startup")
         self.clear_main()
-        self.add_header("STARTUP MANAGER", "Control apps that start with Windows")
+        self.add_header("Startup Manager", "See which apps launch with Windows and turn them on or off.")
+        self.help_text(self.main_area, "Disabling unused startup items speeds boot time and frees RAM after login.")
         
         # Scrollable list
         scroll = ctk.CTkScrollableFrame(self.main_area, fg_color="transparent")
@@ -1133,7 +1224,7 @@ class App(ctk.CTk):
         apps = core.get_startup_apps()
         
         if not apps:
-            ctk.CTkLabel(scroll, text="NO STARTUP APPS FOUND", font=(FONT_MAIN, 14), text_color=COLOR_DIM).pack(pady=20)
+            ctk.CTkLabel(scroll, text="No startup apps found.", font=(FONT_MAIN, 14), text_color=COLOR_DIM).pack(pady=20)
             return
 
         for app in apps:
@@ -1160,44 +1251,42 @@ class App(ctk.CTk):
                 if core.toggle_startup_app(a, new_state):
                     self.show_startup() # Refresh
                 else:
-                    self.status_msg.set("ERROR TOGGLING APP")
+                    self.status_msg.set("Error toggling startup app.")
 
             GothicButton(row, text=btn_text, width=80, fg_color=btn_col, hover_color=btn_col, command=_toggle).pack(side="right", padx=10, pady=5)
 
-    def run_threaded(self, target_func, start_msg="PROCESSING..."):
+    def run_threaded(self, target_func, start_msg="Working..."):
         self.status_msg.set(start_msg)
         
         def _wrapper():
             try:
-                # Some core funcs return a string message, others print/return None
-                # We assume they might return a result string
                 res = target_func()
                 if res and isinstance(res, str):
-                    self.ui_enqueue(self.status_msg.set, res)
+                    self.ui_enqueue(self.status_msg.set, res if res.endswith(".") else f"Done. {res}")
                 else:
-                    self.ui_enqueue(self.status_msg.set, "OPERATION COMPLETE")
+                    self.ui_enqueue(self.status_msg.set, "Done.")
             except Exception as e:
-                self.ui_enqueue(self.status_msg.set, f"ERROR: {str(e)}")
+                self.ui_enqueue(self.status_msg.set, f"Error: {str(e)}")
         
         threading.Thread(target=_wrapper, daemon=True).start()
 
     def cmd_flush_dns(self):
-        self.run_threaded(core.flush_dns, "FLUSHING DNS...")
+        self.run_threaded(core.flush_dns, "Flushing DNS...")
 
     def cmd_optimize_ram(self):
-        self.run_threaded(core.optimize_ram, "OPTIMIZING RAM...")
+        self.run_threaded(core.optimize_ram, "Optimizing RAM...")
 
     def cmd_purge_temp(self):
-        self.run_threaded(core.clean_temp_files, "CLEANING TEMP FILES...")
+        self.run_threaded(core.clean_temp_files, "Cleaning temp files...")
     
     def cmd_recycle_bin(self):
-        self.run_threaded(core.empty_recycle_bin, "EMPTYING RECYCLE BIN...")
+        self.run_threaded(core.empty_recycle_bin, "Emptying Recycle Bin...")
 
     def cmd_kill(self, proc_name):
-        self.run_threaded(lambda: core.kill_process(proc_name), f"KILLING {proc_name.upper()}...")
+        self.run_threaded(lambda: core.kill_process(proc_name), f"Ending {proc_name}...")
 
     def run_ping_check(self):
-        self.status_msg.set("PINGING...")
+        self.status_msg.set("Running ping test...")
         self.lbl_ping_google.configure(text="GOOGLE: ...")
         self.lbl_ping_cf.configure(text="CLOUDFLARE: ...")
         
@@ -1216,7 +1305,7 @@ class App(ctk.CTk):
             t2.start()
             t1.join()
             t2.join()
-            self.ui_enqueue(self.status_msg.set, "PING TEST COMPLETE")
+            self.ui_enqueue(self.status_msg.set, "Done. Ping test complete.")
             
         threading.Thread(target=_check, daemon=True).start()
 
@@ -1251,7 +1340,7 @@ class App(ctk.CTk):
         if self.config.get("minimize_to_tray", False):
             if self._ensure_tray():
                 self.withdraw()
-                self.status_msg.set("MINIMIZED TO TRAY")
+                self.status_msg.set("Minimized to tray.")
                 return
         self.running = False
         tray = getattr(self, "_tray", None)

@@ -38,12 +38,12 @@
 
 | File | Description |
 |------|-------------|
-| [**PCFIX_Setup_v4.0.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Recommended — installer with dependency checks, shortcuts, and `Program Files` install |
-| [**PCFIX_v4.0.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Portable — single executable, no install |
+| [**PCFIX_Setup_v4.0.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Recommended. Installer with dependency checks, shortcuts, and Program Files install |
+| [**PCFIX_v4.0_Portable.zip**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Portable. Unzip the folder and run PCFIX.exe as Administrator |
 
 1. Open **[Releases](https://github.com/DARKSIDE957/PCfix/releases)** and download the build you need.
-2. Run the installer **or** the portable `.exe` **as Administrator**.
-3. Launch from the Desktop shortcut, Start Menu, or the portable file directly.
+2. Run the installer, or unzip the portable folder and run `PCFIX.exe` as Administrator.
+3. Launch from the Desktop shortcut, Start Menu, or the portable `PCFIX.exe` directly.
 
 ---
 
