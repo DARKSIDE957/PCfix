@@ -10,21 +10,21 @@ from modules import core
 
 # --- Configuration ---
 APP_NAME = "PCFIX DIAGNOSTIC TOOL"
-VERSION = "v1.0"
-TARGET_VERSION = "3.10"
+VERSION = "v1.1"
+TARGET_VERSION = "4.0"
 DIST_DIR = "dist"
-APP_EXE = f"PCFIX_{VERSION.replace('v', '')}.exe" if 'v' in VERSION else "PCFIX_v3.8.exe"
-APP_EXE_NAME = "PCFIX_v3.10.exe"
-SETUP_EXE_NAME = "PCFIX_Setup_v3.10.exe"
+APP_EXE = f"PCFIX_v{TARGET_VERSION}.exe"
+APP_EXE_NAME = "PCFIX_v4.0.exe"
+SETUP_EXE_NAME = "PCFIX_Setup_v4.0.exe"
 
 # Colors
-COLOR_BG = "#050505"
-COLOR_SURFACE = "#121212"
-COLOR_ACCENT = "#d00000" # Red for diagnostic
-COLOR_TEXT = "#e0e0e0"
-COLOR_SUCCESS = "#00c853"
-COLOR_WARN = "#ffd600"
-COLOR_ERROR = "#cf0000"
+COLOR_BG = "#000000"
+COLOR_SURFACE = "#141416"
+COLOR_ACCENT = "#e11d48"
+COLOR_TEXT = "#f4f4f5"
+COLOR_SUCCESS = "#22c55e"
+COLOR_WARN = "#f59e0b"
+COLOR_ERROR = "#e11d48"
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")

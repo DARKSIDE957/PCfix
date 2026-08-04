@@ -17,18 +17,18 @@ import tempfile
 APP_NAME = "PCFIX"
 EXE_NAME = "PCFIX.exe"
 DEFAULT_INSTALL_DIR = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), APP_NAME)
-APP_VERSION = "3.10"
+APP_VERSION = "4.0"
 
 # --- Theme Colors (Gothic/Dark/Cyberpunk) ---
-COLOR_BG = "#050505"       # Deep Black
-COLOR_SIDEBAR = "#0a0a0a"  # Slightly Lighter Black
-COLOR_SURFACE = "#121212"  # Dark Gray
-COLOR_ACCENT = "#d00000"
-COLOR_ACCENT_HOVER = "#a00000"
-COLOR_TEXT = "#e0e0e0"     # Light Gray
-COLOR_DIM = "#606060"      # Dim Gray
-COLOR_SUCCESS = "#00c853"
-COLOR_ERROR = "#cf0000"
+COLOR_BG = "#000000"
+COLOR_SIDEBAR = "#0c0c0e"
+COLOR_SURFACE = "#141416"
+COLOR_ACCENT = "#e11d48"
+COLOR_ACCENT_HOVER = "#f43f5e"
+COLOR_TEXT = "#f4f4f5"
+COLOR_DIM = "#71717a"
+COLOR_SUCCESS = "#22c55e"
+COLOR_ERROR = "#e11d48"
 
 FONT_MAIN = "Segoe UI"
 FONT_MONO = "Consolas"

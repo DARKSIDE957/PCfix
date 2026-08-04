@@ -24,61 +24,93 @@ def resource_path(relative_path):
 
     return os.path.join(base_path, relative_path)
 
-# --- MODERN GOTHIC THEME V2 ---
-COLOR_BG = "#09090b"      # Zinc-950 (Deepest Black)
-COLOR_SURFACE = "#18181b" # Zinc-900 (Panel Background)
-COLOR_ACCENT = "#dc2626"  # Red-600 (Primary Action)
-COLOR_ACCENT_HOVER = "#ef4444" # Red-500 (Hover State)
-COLOR_TEXT = "#fafafa"    # Zinc-50 (High Contrast Text)
-COLOR_DIM = "#71717a"     # Zinc-500 (Subtitles/Inactive)
-COLOR_BORDER = "#27272a"  # Zinc-800 (Subtle Borders)
+# --- NECROMANCER v4.0 — OLED Crimson ---
+APP_VERSION = "v4.0"
+COLOR_BG = "#000000"
+COLOR_SURFACE = "#0c0c0e"
+COLOR_ELEVATED = "#141416"
+COLOR_ACCENT = "#e11d48"
+COLOR_ACCENT_HOVER = "#f43f5e"
+COLOR_ACCENT_DIM = "#9f1239"
+COLOR_TEXT = "#f4f4f5"
+COLOR_DIM = "#71717a"
+COLOR_MUTED = "#a1a1aa"
+COLOR_BORDER = "#1f1f23"
+COLOR_GOOD = "#22c55e"
+COLOR_WARN = "#f59e0b"
 
 FONT_MAIN = "Segoe UI"
+FONT_DISPLAY = "Segoe UI Semibold"
 FONT_MONO = "Consolas"
 
 ctk.set_appearance_mode("Dark")
-ctk.set_default_color_theme("dark-blue") # Placeholder, we override
+ctk.set_default_color_theme("dark-blue")
 
 class GothicButton(ctk.CTkButton):
     def __init__(self, master, text, command, **kwargs):
-        kwargs.setdefault("fg_color", COLOR_SURFACE)
-        kwargs.setdefault("hover_color", "#27272a") # Zinc-800
+        kwargs.setdefault("fg_color", COLOR_ELEVATED)
+        kwargs.setdefault("hover_color", "#1c1c20")
         kwargs.setdefault("border_color", COLOR_BORDER)
         kwargs.setdefault("border_width", 1)
         kwargs.setdefault("text_color", COLOR_TEXT)
-        kwargs.setdefault("corner_radius", 5) # Smoother edges
+        kwargs.setdefault("corner_radius", 8)
         kwargs.setdefault("font", (FONT_MAIN, 12, "bold"))
-        kwargs.setdefault("height", 45) # Taller for modern feel
-        
+        kwargs.setdefault("height", 42)
         super().__init__(master, text=text, command=command, **kwargs)
 
 class AccentButton(ctk.CTkButton):
-    """Primary Action Button"""
     def __init__(self, master, text, command, **kwargs):
         kwargs.setdefault("fg_color", COLOR_ACCENT)
         kwargs.setdefault("hover_color", COLOR_ACCENT_HOVER)
-        kwargs.setdefault("text_color", "white")
-        kwargs.setdefault("corner_radius", 5)
-        kwargs.setdefault("font", (FONT_MAIN, 12, "bold"))
-        kwargs.setdefault("height", 45)
-        
+        kwargs.setdefault("text_color", "#ffffff")
+        kwargs.setdefault("corner_radius", 8)
+        kwargs.setdefault("font", (FONT_MAIN, 13, "bold"))
+        kwargs.setdefault("height", 48)
+        kwargs.setdefault("border_width", 0)
         super().__init__(master, text=text, command=command, **kwargs)
 
 class StatusCard(ctk.CTkFrame):
     def __init__(self, master, title, value_var, icon=""):
-        super().__init__(master, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=1, corner_radius=10)
-        
-        self.header = ctk.CTkFrame(self, fg_color="transparent")
-        self.header.pack(pady=(15, 5))
-        
+        super().__init__(master, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=1, corner_radius=12)
+        inner = ctk.CTkFrame(self, fg_color="transparent")
+        inner.pack(fill="both", expand=True, padx=16, pady=16)
+
+        head = ctk.CTkFrame(inner, fg_color="transparent")
+        head.pack(fill="x")
         if icon:
-             ctk.CTkLabel(self.header, text=icon, font=(FONT_MAIN, 16)).pack(side="left", padx=(0, 5))
-             
-        self.title_label = ctk.CTkLabel(self.header, text=title, font=(FONT_MAIN, 11, "bold"), text_color=COLOR_DIM)
-        self.title_label.pack(side="left")
-        
-        self.value_label = ctk.CTkLabel(self, textvariable=value_var, font=(FONT_MONO, 28, "bold"), text_color=COLOR_TEXT)
-        self.value_label.pack(pady=(0, 15))
+            ctk.CTkLabel(head, text=icon, font=(FONT_MAIN, 14), text_color=COLOR_ACCENT).pack(side="left", padx=(0, 6))
+        ctk.CTkLabel(head, text=title, font=(FONT_MAIN, 11, "bold"), text_color=COLOR_DIM).pack(side="left")
+
+        self.value_label = ctk.CTkLabel(inner, textvariable=value_var, font=(FONT_MONO, 30, "bold"), text_color=COLOR_TEXT)
+        self.value_label.pack(anchor="w", pady=(10, 8))
+
+        self.bar = ctk.CTkProgressBar(inner, height=4, corner_radius=2, progress_color=COLOR_ACCENT, fg_color=COLOR_BORDER)
+        self.bar.pack(fill="x")
+        self.bar.set(0)
+        self._value_var = value_var
+        self._tick()
+
+    def _tick(self):
+        try:
+            raw = self._value_var.get().replace("%", "").strip()
+            for ch in ("⚡", "🔋", " "):
+                raw = raw.replace(ch, "")
+            pct = max(0.0, min(1.0, float(raw) / 100.0)) if raw.replace(".", "", 1).isdigit() else 0.0
+            self.bar.set(pct)
+            self.bar.configure(progress_color=COLOR_ACCENT if pct < 0.85 else COLOR_WARN)
+        except Exception:
+            pass
+        try:
+            self.after(800, self._tick)
+        except Exception:
+            pass
+
+class SectionLabel(ctk.CTkLabel):
+    def __init__(self, master, text, **kwargs):
+        kwargs.setdefault("font", (FONT_MAIN, 11, "bold"))
+        kwargs.setdefault("text_color", COLOR_DIM)
+        kwargs.setdefault("anchor", "w")
+        super().__init__(master, text=text.upper(), **kwargs)
 
 class App(ctk.CTk):
     def __init__(self):
@@ -88,21 +120,20 @@ class App(ctk.CTk):
         if not core.is_admin():
             core.elevate()
 
-        self.title("PCFIX | NECROMANCER EDITION")
-        self.geometry("1200x850") # Larger window as requested
+        self.title(f"PCFIX | NECROMANCER {APP_VERSION}")
+        self.geometry("1280x860")
+        self.minsize(1000, 700)
         self.resizable(True, True)
         self.configure(fg_color=COLOR_BG)
-        
-        # Config
+
         self.config = core.load_config()
         self.protocol("WM_DELETE_WINDOW", self.on_close)
-        
+
         try:
             self.iconbitmap(resource_path("icon.ico"))
-        except:
+        except Exception:
             pass
-        
-        # Variables
+
         self.running = True
         self.var_cpu = ctk.StringVar(value="0%")
         self.var_ram = ctk.StringVar(value="0%")
@@ -113,75 +144,101 @@ class App(ctk.CTk):
         self._log_file = self._resolve_log_file()
         self._log("APP_START")
 
-        # Layout
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Sidebar
-        self.sidebar = ctk.CTkFrame(self, width=240, corner_radius=0, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=0)
+        # Sidebar shell
+        self.sidebar = ctk.CTkFrame(self, width=248, corner_radius=0, fg_color=COLOR_SURFACE)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
-        
-        # Sidebar Separator
-        self.sidebar_sep = ctk.CTkFrame(self.sidebar, width=1, fg_color=COLOR_BORDER)
-        self.sidebar_sep.pack(side="right", fill="y")
+        self.sidebar.grid_propagate(False)
+        ctk.CTkFrame(self.sidebar, width=1, fg_color=COLOR_BORDER).pack(side="right", fill="y")
 
-        # Logo Area
-        self.logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        self.logo_frame.pack(pady=(30, 20), padx=20, fill="x")
-        
+        brand = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+        brand.pack(fill="x", padx=18, pady=(22, 8))
         try:
-            img_path = resource_path("icon.ico")
-            self.logo_img = ctk.CTkImage(Image.open(img_path), size=(60, 60))
-            self.logo = ctk.CTkLabel(self.logo_frame, text="  PCFIX", image=self.logo_img, compound="left", font=(FONT_MAIN, 24, "bold"), text_color=COLOR_TEXT)
-        except:
-            self.logo = ctk.CTkLabel(self.logo_frame, text="PCFIX", font=(FONT_MAIN, 28, "bold"), text_color=COLOR_TEXT)
-        self.logo.pack(anchor="w")
-        
-        ctk.CTkLabel(self.sidebar, text="NECROMANCER v3.10", font=(FONT_MONO, 10), text_color=COLOR_DIM).pack(pady=(0, 20), padx=20, anchor="w")
+            self.logo_img = ctk.CTkImage(Image.open(resource_path("icon.ico")), size=(42, 42))
+            ctk.CTkLabel(brand, text="  PCFIX", image=self.logo_img, compound="left",
+                         font=(FONT_DISPLAY, 22, "bold"), text_color=COLOR_TEXT).pack(anchor="w")
+        except Exception:
+            ctk.CTkLabel(brand, text="PCFIX", font=(FONT_DISPLAY, 24, "bold"), text_color=COLOR_TEXT).pack(anchor="w")
+        ctk.CTkLabel(brand, text=f"NECROMANCER  ·  {APP_VERSION}", font=(FONT_MONO, 10),
+                     text_color=COLOR_ACCENT).pack(anchor="w", pady=(6, 0))
 
-        # Navigation
-        self.nav_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        self.nav_frame.pack(fill="x", padx=10)
+        self.nav_scroll = ctk.CTkScrollableFrame(self.sidebar, fg_color="transparent",
+                                                 scrollbar_button_color=COLOR_BORDER,
+                                                 scrollbar_button_hover_color=COLOR_ELEVATED)
+        self.nav_scroll.pack(fill="both", expand=True, padx=8, pady=(4, 0))
+        self.nav_frame = self.nav_scroll
 
         self._nav_buttons = {}
+        self._nav_accents = {}
         self._active_nav = None
 
-        self.create_nav_btn("📊 DASHBOARD", self.show_dashboard, "dashboard")
-        self.create_nav_btn("🧹 CLEANER", self.show_cleaner, "cleaner")
-        self.create_nav_btn("🔧 REPAIR", self.show_repair, "repair")
-        self.create_nav_btn("🚀 BOOST", self.show_boost, "boost")
-        self.create_nav_btn("🧩 TWEAKS", self.show_tweaks, "tweaks")
-        self.create_nav_btn("🚦 STARTUP", self.show_startup, "startup")
-        self.create_nav_btn("🖥️ SPECS", self.show_info, "specs")
-        self.create_nav_btn("🛠️ TOOLS", self.show_tools, "tools")
-        self.create_nav_btn("🌐 NETWORK", self.show_network, "network")
-        self.create_nav_btn("🔒 PRIVACY", self.show_privacy, "privacy")
-        self.create_nav_btn("🧹 DEBLOATER", self.show_debloater, "debloater")
-        self.create_nav_btn("🔓 UNLOCKER", self.show_shredder, "unlocker")
-        self.create_nav_btn("🗑 FORCE REMOVE APP", self.show_force_remove_app, "force_remove")
-        self.create_nav_btn("☠️ BSOD ANALYZER", self.show_bsod, "bsod")
-        self.create_nav_btn("⚙️ SETTINGS", self.show_settings, "settings")
-        self.create_nav_btn("ℹ️ ABOUT", self.show_about, "about")
-        
-        GothicButton(self.sidebar, text="❌ EXIT", command=self.destroy, fg_color="#1a0000", hover_color="#7f1d1d", border_color="#7f1d1d").pack(fill="x", pady=20, padx=10, side="bottom")
+        nav_groups = [
+            ("Overview", [
+                ("Dashboard", self.show_dashboard, "dashboard"),
+                ("Specs", self.show_info, "specs"),
+            ]),
+            ("Maintain", [
+                ("Cleaner", self.show_cleaner, "cleaner"),
+                ("Repair", self.show_repair, "repair"),
+                ("Debloater", self.show_debloater, "debloater"),
+                ("Unlocker", self.show_shredder, "unlocker"),
+                ("Force Remove", self.show_force_remove_app, "force_remove"),
+            ]),
+            ("Tune", [
+                ("Boost", self.show_boost, "boost"),
+                ("Tweaks", self.show_tweaks, "tweaks"),
+                ("Startup", self.show_startup, "startup"),
+                ("Privacy", self.show_privacy, "privacy"),
+            ]),
+            ("Network", [
+                ("Network", self.show_network, "network"),
+                ("Tools", self.show_tools, "tools"),
+            ]),
+            ("Diagnose", [
+                ("BSOD Analyzer", self.show_bsod, "bsod"),
+            ]),
+            ("App", [
+                ("Settings", self.show_settings, "settings"),
+                ("About", self.show_about, "about"),
+            ]),
+        ]
+        for group_name, items in nav_groups:
+            SectionLabel(self.nav_frame, group_name).pack(anchor="w", padx=10, pady=(14, 4))
+            for label, cmd, nav_id in items:
+                self.create_nav_btn(label, cmd, nav_id)
 
-        # Main Area
-        self.main_area = ctk.CTkFrame(self, fg_color="transparent")
-        self.main_area.grid(row=0, column=1, sticky="nsew", padx=30, pady=30)
+        GothicButton(
+            self.sidebar, text="Exit", command=self.destroy,
+            fg_color="#1a0508", hover_color=COLOR_ACCENT_DIM, border_color=COLOR_ACCENT_DIM, height=38
+        ).pack(fill="x", pady=14, padx=12, side="bottom")
+
+        self.main_shell = ctk.CTkFrame(self, fg_color="transparent")
+        self.main_shell.grid(row=0, column=1, sticky="nsew")
+        self.main_shell.grid_columnconfigure(0, weight=1)
+        self.main_shell.grid_rowconfigure(0, weight=1)
+
+        self.main_area = ctk.CTkFrame(self.main_shell, fg_color="transparent")
+        self.main_area.grid(row=0, column=0, sticky="nsew", padx=28, pady=(24, 8))
+
+        self.status_bar = ctk.CTkFrame(self.main_shell, fg_color=COLOR_SURFACE, height=36, corner_radius=0)
+        self.status_bar.grid(row=1, column=0, sticky="ew")
+        ctk.CTkFrame(self.status_bar, height=1, fg_color=COLOR_BORDER).pack(fill="x")
+        status_inner = ctk.CTkFrame(self.status_bar, fg_color="transparent")
+        status_inner.pack(fill="x", padx=20, pady=8)
+        ctk.CTkLabel(status_inner, text="●", font=(FONT_MAIN, 10), text_color=COLOR_ACCENT).pack(side="left", padx=(0, 8))
+        ctk.CTkLabel(status_inner, textvariable=self.status_msg, font=(FONT_MONO, 11),
+                     text_color=COLOR_MUTED).pack(side="left")
+        ctk.CTkLabel(status_inner, text=APP_VERSION, font=(FONT_MONO, 10),
+                     text_color=COLOR_DIM).pack(side="right")
 
         self.show_dashboard()
 
-        # Monitoring
-        self.running = True
         self.monitor_thread = threading.Thread(target=self.monitor_loop, daemon=True)
         self.monitor_thread.start()
-
-        # Startup Sound
         core.play_startup_sound()
-        
-        # Start Auto RAM Optimization
         self.start_auto_ram_optimization()
-
         self.after(50, self._process_ui_queue)
 
     def _resolve_log_file(self):
@@ -228,10 +285,15 @@ class App(ctk.CTk):
             return
         self._active_nav = nav_id
         for key, btn in self._nav_buttons.items():
+            accent = self._nav_accents.get(key)
             if key == nav_id:
-                btn.configure(fg_color=COLOR_BORDER, hover_color=COLOR_BORDER, text_color=COLOR_TEXT)
+                btn.configure(fg_color=COLOR_ELEVATED, hover_color=COLOR_ELEVATED, text_color=COLOR_TEXT)
+                if accent:
+                    accent.configure(fg_color=COLOR_ACCENT)
             else:
-                btn.configure(fg_color="transparent", hover_color="#27272a", text_color=COLOR_DIM)
+                btn.configure(fg_color="transparent", hover_color="#161618", text_color=COLOR_DIM)
+                if accent:
+                    accent.configure(fg_color="transparent")
 
     def add_config_switch(self, parent, cfg, text, key, on_func, off_func, desc, warn_text=None):
         var = ctk.BooleanVar(value=cfg.get(key, False))
@@ -252,7 +314,7 @@ class App(ctk.CTk):
         sw.pack(anchor="w", pady=6)
         ctk.CTkLabel(parent, text=desc, font=(FONT_MAIN, 10), text_color=COLOR_DIM, wraplength=900, justify="left").pack(anchor="w", pady=(0, 8))
         if warn_text:
-            ctk.CTkLabel(parent, text=f"⚠ {warn_text}", font=(FONT_MAIN, 10, "bold"), text_color=COLOR_ACCENT, wraplength=900, justify="left").pack(anchor="w", pady=(0, 12))
+            ctk.CTkLabel(parent, text=f"Warning: {warn_text}", font=(FONT_MAIN, 10, "bold"), text_color=COLOR_ACCENT, wraplength=900, justify="left").pack(anchor="w", pady=(0, 12))
 
         return var
 
@@ -270,9 +332,20 @@ class App(ctk.CTk):
                 pass
 
     def create_nav_btn(self, text, command, nav_id):
-        btn = GothicButton(self.nav_frame, text=text, command=lambda: self.navigate(nav_id, command), anchor="w", fg_color="transparent", border_width=0, height=35, text_color=COLOR_DIM, hover_color="#27272a")
-        btn.pack(fill="x", pady=1)
+        row = ctk.CTkFrame(self.nav_frame, fg_color="transparent", height=36)
+        row.pack(fill="x", pady=1)
+        row.pack_propagate(False)
+        accent = ctk.CTkFrame(row, width=3, fg_color="transparent", corner_radius=2)
+        accent.pack(side="left", fill="y", padx=(2, 0), pady=4)
+        btn = ctk.CTkButton(
+            row, text=text, command=lambda: self.navigate(nav_id, command),
+            anchor="w", fg_color="transparent", hover_color="#161618",
+            border_width=0, height=36, corner_radius=6,
+            text_color=COLOR_DIM, font=(FONT_MAIN, 12),
+        )
+        btn.pack(side="left", fill="both", expand=True, padx=(6, 4))
         self._nav_buttons[nav_id] = btn
+        self._nav_accents[nav_id] = accent
 
     def start_auto_ram_optimization(self):
         def _auto_opt():
@@ -289,62 +362,68 @@ class App(ctk.CTk):
             widget.destroy()
 
     def add_header(self, title, subtitle=""):
-        ctk.CTkLabel(self.main_area, text=title, font=(FONT_MAIN, 26, "bold"), text_color=COLOR_TEXT).pack(anchor="w", pady=(0, 5))
+        head = ctk.CTkFrame(self.main_area, fg_color="transparent")
+        head.pack(fill="x", pady=(0, 18))
+        accent_line = ctk.CTkFrame(head, width=4, height=36, fg_color=COLOR_ACCENT, corner_radius=2)
+        accent_line.pack(side="left", padx=(0, 12))
+        text_col = ctk.CTkFrame(head, fg_color="transparent")
+        text_col.pack(side="left", fill="x", expand=True)
+        ctk.CTkLabel(text_col, text=title, font=(FONT_DISPLAY, 24, "bold"), text_color=COLOR_TEXT).pack(anchor="w")
         if subtitle:
-            ctk.CTkLabel(self.main_area, text=subtitle, font=(FONT_MAIN, 12), text_color=COLOR_DIM).pack(anchor="w", pady=(0, 20))
-        else:
-            ctk.CTkFrame(self.main_area, height=20, fg_color="transparent").pack() # Spacer
+            ctk.CTkLabel(text_col, text=subtitle, font=(FONT_MAIN, 12), text_color=COLOR_DIM).pack(anchor="w", pady=(2, 0))
 
     def show_dashboard(self):
         self.set_active_nav("dashboard")
         self.clear_main()
-        self.add_header("SYSTEM OVERVIEW", "Real-time metrics and quick actions")
-        
-        # Cards Grid
+
+        hero = ctk.CTkFrame(self.main_area, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=1, corner_radius=14)
+        hero.pack(fill="x", pady=(0, 18))
+        hero_inner = ctk.CTkFrame(hero, fg_color="transparent")
+        hero_inner.pack(fill="x", padx=22, pady=20)
+        ctk.CTkLabel(hero_inner, text="PCFIX", font=(FONT_DISPLAY, 32, "bold"), text_color=COLOR_TEXT).pack(anchor="w")
+        ctk.CTkLabel(
+            hero_inner,
+            text="Resurrect performance — clean, repair, and tune from one place.",
+            font=(FONT_MAIN, 13), text_color=COLOR_MUTED
+        ).pack(anchor="w", pady=(4, 14))
+        AccentButton(
+            hero_inner,
+            text="Run Smart Scan",
+            command=lambda: self.run_threaded(core.run_smart_scan, "RUNNING SMART SCAN..."),
+            width=220
+        ).pack(anchor="w")
+
         grid = ctk.CTkFrame(self.main_area, fg_color="transparent")
         grid.pack(fill="x")
-        
-        # Check for battery to decide layout
         stats = core.get_system_status()
         has_battery = "battery" in stats
 
         if has_battery:
             grid.columnconfigure((0, 1, 2, 3), weight=1)
-            StatusCard(grid, "CPU LOAD", self.var_cpu, "🧠").grid(row=0, column=0, padx=(0, 5), sticky="ew")
-            StatusCard(grid, "RAM USAGE", self.var_ram, "💾").grid(row=0, column=1, padx=5, sticky="ew")
-            StatusCard(grid, "DISK SPACE", self.var_disk, "💿").grid(row=0, column=2, padx=5, sticky="ew")
-            StatusCard(grid, "BATTERY", self.var_battery, "🔋").grid(row=0, column=3, padx=(5, 0), sticky="ew")
+            StatusCard(grid, "CPU", self.var_cpu).grid(row=0, column=0, padx=(0, 8), sticky="ew")
+            StatusCard(grid, "RAM", self.var_ram).grid(row=0, column=1, padx=8, sticky="ew")
+            StatusCard(grid, "DISK", self.var_disk).grid(row=0, column=2, padx=8, sticky="ew")
+            StatusCard(grid, "BATTERY", self.var_battery).grid(row=0, column=3, padx=(8, 0), sticky="ew")
         else:
             grid.columnconfigure((0, 1, 2), weight=1)
-            StatusCard(grid, "CPU LOAD", self.var_cpu, "🧠").grid(row=0, column=0, padx=(0, 10), sticky="ew")
-            StatusCard(grid, "RAM USAGE", self.var_ram, "💾").grid(row=0, column=1, padx=10, sticky="ew")
-            StatusCard(grid, "DISK SPACE", self.var_disk, "💿").grid(row=0, column=2, padx=(10, 0), sticky="ew")
+            StatusCard(grid, "CPU", self.var_cpu).grid(row=0, column=0, padx=(0, 8), sticky="ew")
+            StatusCard(grid, "RAM", self.var_ram).grid(row=0, column=1, padx=8, sticky="ew")
+            StatusCard(grid, "DISK", self.var_disk).grid(row=0, column=2, padx=(8, 0), sticky="ew")
 
-        # Auto RAM Status
         auto_ram_status = "ACTIVE" if self.config.get("auto_ram", True) else "DISABLED"
-        color = "#22c55e" if auto_ram_status == "ACTIVE" else COLOR_DIM # Green-500
-        ctk.CTkLabel(self.main_area, text=f"• AUTO RAM OPTIMIZER IS {auto_ram_status}", font=(FONT_MONO, 11), text_color=color).pack(pady=(15, 0), anchor="w")
+        color = COLOR_GOOD if auto_ram_status == "ACTIVE" else COLOR_DIM
+        ctk.CTkLabel(
+            self.main_area,
+            text=f"Auto RAM optimizer  ·  {auto_ram_status}",
+            font=(FONT_MONO, 11), text_color=color
+        ).pack(pady=(14, 0), anchor="w")
 
-        # AI Smart Scan (New Feature)
-        ctk.CTkLabel(self.main_area, text="AI OPTIMIZATION", font=(FONT_MAIN, 16, "bold"), text_color=COLOR_TEXT).pack(anchor="w", pady=(40, 10))
-        
-        AccentButton(
-            self.main_area, 
-            text="⚡ RUN SMART SCAN (AUTO-FIX)", 
-            command=lambda: self.run_threaded(core.run_smart_scan, "RUNNING SMART SCAN...")
-        ).pack(fill="x", pady=5)
-
-        # Quick Actions
-        ctk.CTkLabel(self.main_area, text="QUICK PROTOCOLS", font=(FONT_MAIN, 16, "bold"), text_color=COLOR_TEXT).pack(anchor="w", pady=(30, 10))
-
+        SectionLabel(self.main_area, "Quick actions").pack(anchor="w", pady=(28, 10))
         actions = ctk.CTkFrame(self.main_area, fg_color="transparent")
         actions.pack(fill="x")
-        
-        GothicButton(actions, text="🌐 FLUSH DNS", command=self.cmd_flush_dns).pack(side="left", fill="x", expand=True, padx=(0, 5))
-        GothicButton(actions, text="🧹 OPTIMIZE RAM", command=self.cmd_optimize_ram).pack(side="left", fill="x", expand=True, padx=(5, 0))
-
-        # Status Bar
-        ctk.CTkLabel(self.main_area, textvariable=self.status_msg, font=(FONT_MONO, 11), text_color=COLOR_DIM).pack(side="bottom", anchor="w")
+        GothicButton(actions, text="Flush DNS", command=self.cmd_flush_dns).pack(side="left", fill="x", expand=True, padx=(0, 6))
+        GothicButton(actions, text="Optimize RAM", command=self.cmd_optimize_ram).pack(side="left", fill="x", expand=True, padx=(6, 6))
+        GothicButton(actions, text="Purge Temp", command=self.cmd_purge_temp).pack(side="left", fill="x", expand=True, padx=(6, 0))
 
     def show_tweaks(self):
         self.set_active_nav("tweaks")
@@ -872,30 +951,24 @@ class App(ctk.CTk):
     def show_about(self):
         self.set_active_nav("about")
         self.clear_main()
-        ctk.CTkLabel(self.main_area, text="PCFIX v3.10", font=(FONT_MAIN, 32, "bold"), text_color=COLOR_ACCENT).pack(pady=(40, 5))
-        ctk.CTkLabel(self.main_area, text="NECROMANCER | ALL IN ONE EDITION", font=(FONT_MONO, 14), text_color=COLOR_DIM).pack(pady=(0, 20))
-        
-        # Description
-        desc = ("PCFIX is the ultimate system utility designed to resurrect your PC.\n"
-                "It offers advanced debloating, privacy protection, system repair, \n"
-                "network optimization, and hardware diagnostics in one lightweight tool.")
-        ctk.CTkLabel(self.main_area, text=desc, font=(FONT_MAIN, 13), text_color=COLOR_TEXT, justify="center").pack(pady=10)
-        
-        # Credits / Contact
-        contact_frame = ctk.CTkFrame(self.main_area, fg_color="transparent")
-        contact_frame.pack(pady=30)
-        
-        ctk.CTkLabel(contact_frame, text="DEVELOPER: DARKSIDE957", font=(FONT_MAIN, 14, "bold"), text_color=COLOR_TEXT).pack(pady=2)
-        ctk.CTkLabel(contact_frame, text="DISCORD: _OMV", font=(FONT_MONO, 12), text_color=COLOR_ACCENT).pack(pady=2)
-        
-        link = "https://github.com/DARKSIDE957"
+        card = ctk.CTkFrame(self.main_area, fg_color=COLOR_SURFACE, border_color=COLOR_BORDER, border_width=1, corner_radius=14)
+        card.pack(fill="x", pady=(20, 0))
+        inner = ctk.CTkFrame(card, fg_color="transparent")
+        inner.pack(fill="x", padx=28, pady=32)
+        ctk.CTkLabel(inner, text=f"PCFIX {APP_VERSION}", font=(FONT_DISPLAY, 34, "bold"), text_color=COLOR_ACCENT).pack(anchor="w")
+        ctk.CTkLabel(inner, text="NECROMANCER  ·  ALL-IN-ONE WINDOWS TOOLKIT", font=(FONT_MONO, 12), text_color=COLOR_DIM).pack(anchor="w", pady=(6, 16))
+        desc = ("Clean, repair, tweak, and diagnose Windows from a single dark UI.\n"
+                "Debloat, privacy shield, network tools, and BSOD analysis included.")
+        ctk.CTkLabel(inner, text=desc, font=(FONT_MAIN, 13), text_color=COLOR_TEXT, justify="left").pack(anchor="w")
+        ctk.CTkLabel(inner, text="Developer  ·  DARKSIDE957", font=(FONT_MAIN, 13, "bold"), text_color=COLOR_TEXT).pack(anchor="w", pady=(22, 2))
+        ctk.CTkLabel(inner, text="Discord  ·  _OMV", font=(FONT_MONO, 12), text_color=COLOR_ACCENT).pack(anchor="w")
+
         def open_link():
             import webbrowser
-            webbrowser.open(link)
-            
-        GothicButton(self.main_area, text="🌐 GITHUB: DARKSIDE957", command=open_link, width=200).pack(pady=20)
-        
-        ctk.CTkLabel(self.main_area, text="© 2026 DARKSIDE957. All Rights Reserved.", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(side="bottom", pady=20)
+            webbrowser.open("https://github.com/DARKSIDE957/PCfix")
+
+        GothicButton(inner, text="Open GitHub", command=open_link, width=180).pack(anchor="w", pady=(20, 0))
+        ctk.CTkLabel(self.main_area, text="© 2026 DARKSIDE957", font=(FONT_MAIN, 10), text_color=COLOR_DIM).pack(side="bottom", pady=16)
 
     def show_boost(self):
         self.set_active_nav("boost")
@@ -1212,7 +1285,7 @@ class PCFixWebApi:
             pass
 
     def ping(self):
-        return {"ok": True, "version": "v3.10"}
+        return {"ok": True, "version": APP_VERSION}
 
     def minimize(self):
         try:

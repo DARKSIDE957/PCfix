@@ -4,7 +4,7 @@
 
 ### Resurrect your PC — optimize, clean, repair, and diagnose in one place.
 
-[![Version](https://img.shields.io/badge/version-v3.10-red?style=for-the-badge)](https://github.com/DARKSIDE957/PCfix/releases/tag/v3.10)
+[![Version](https://img.shields.io/badge/version-v4.0-red?style=for-the-badge)](https://github.com/DARKSIDE957/PCfix/releases/tag/v4.0)
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/DARKSIDE957/PCfix)
 [![Python](https://img.shields.io/badge/python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
@@ -19,22 +19,18 @@
 
 ## What is PCFIX?
 
-**PCFIX** is a Windows desktop toolkit for power users who want maintenance, tuning, and troubleshooting without juggling a dozen separate utilities. A dark, modern UI wraps deep system actions: registry tweaks, service controls, network fixes, debloating, force-delete tools, and a built-in **BSOD Analyzer** with crash history and repair shortcuts.
+**PCFIX** is a Windows desktop toolkit for power users who want maintenance, tuning, and troubleshooting without juggling a dozen separate utilities. A dark OLED UI wraps deep system actions: registry tweaks, service controls, network fixes, debloating, force-delete tools, and a built-in **BSOD Analyzer** with crash history and repair shortcuts.
 
 > **Run as Administrator** for full functionality. Many actions change system settings, services, or protected files.
 
 ---
 
-## Table of contents
+## What's new in v4.0
 
-- [Downloads](#downloads)
-- [Features](#features)
-- [App modules](#app-modules)
-- [Requirements](#requirements)
-- [Troubleshooting](#troubleshooting)
-- [Uninstall](#uninstall)
-- [Disclaimer](#disclaimer)
-- [License](#license)
+- Redesigned **Necromancer** shell — true OLED blacks, crimson accents, grouped navigation
+- Live metric cards with usage bars on the dashboard
+- Persistent status bar and clearer page headers
+- Installer and portable builds updated for **v4.0**
 
 ---
 
@@ -42,8 +38,8 @@
 
 | File | Description |
 |------|-------------|
-| [**PCFIX_Setup_v3.10.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Recommended — installer with dependency checks, shortcuts, and `Program Files` install |
-| [**PCFIX_v3.10.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Portable — single executable, no install |
+| [**PCFIX_Setup_v4.0.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Recommended — installer with dependency checks, shortcuts, and `Program Files` install |
+| [**PCFIX_v4.0.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Portable — single executable, no install |
 
 1. Open **[Releases](https://github.com/DARKSIDE957/PCfix/releases)** and download the build you need.
 2. Run the installer **or** the portable `.exe` **as Administrator**.
@@ -104,7 +100,7 @@
 
 | Section | What it does |
 |---------|----------------|
-| **Dashboard** | Live stats, Smart Scan, quick DNS/RAM actions |
+| **Dashboard** | Live stats, Smart Scan, quick DNS/RAM/temp actions |
 | **Cleaner** | Deep cleaning toggles, services, privacy, gaming |
 | **Repair** | SFC, DISM, network stack reset, disk check |
 | **Boost** | Performance plan and GPU-oriented shortcuts |
@@ -187,7 +183,7 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE).
 
 <div align="center">
 
-**PCFIX NECROMANCER v3.10** · Made for Windows power users
+**PCFIX NECROMANCER v4.0** · Made for Windows power users
 
 [Star this repo](https://github.com/DARKSIDE957/PCfix) if it helped you
 

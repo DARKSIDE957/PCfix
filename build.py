@@ -48,6 +48,7 @@ def clean_old_builds():
     kill_process("PCFIX_v3.8.exe")
     kill_process("PCFIX_v3.9.exe")
     kill_process("PCFIX_v3.10.exe")
+    kill_process("PCFIX_v4.0.exe")
     
     # Try multiple times to delete dist
     for i in range(3):
@@ -73,7 +74,7 @@ def clean_old_builds():
             
     print("Cleaned.")
 
-VERSION = "v3.10"
+VERSION = "v4.0"
 
 def build_exe():
     print("Building PCFIX.exe...")
