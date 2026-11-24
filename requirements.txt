@@ -1,6 +1,0 @@
-customtkinter
-psutil
-Pillow
-pyinstaller
-pystray
-pywebview

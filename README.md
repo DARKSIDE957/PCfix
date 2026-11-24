@@ -1,17 +1,15 @@
 <div align="center">
 
-# PCFIX · NECROMANCER EDITION
+# PCFIX · NECROMANCER EDITION v4.1
 
-### Resurrect your PC — optimize, clean, repair, and diagnose in one place.
+### Resurrect your PC — repair, clean, optimize, and diagnose Windows in one native toolkit.
 
-[![Version](https://img.shields.io/badge/version-v4.0-red?style=for-the-badge)](https://github.com/DARKSIDE957/PCfix/releases/tag/v4.0)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/DARKSIDE957/PCfix)
-[![Python](https://img.shields.io/badge/python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
+[![Version](https://img.shields.io/badge/version-v4.1-E11D48?style=for-the-badge)](https://github.com/DARKSIDE957/PCfix/releases/tag/v4.1)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11%20x64-0078D6?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/DARKSIDE957/PCfix)
+[![Runtime](https://img.shields.io/badge/native-.NET%208%20WPF-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://github.com/DARKSIDE957/PCfix/releases/latest)
+[![License](https://img.shields.io/badge/license-MIT-22C55E?style=for-the-badge)](https://github.com/DARKSIDE957/PCfix)
 
-[**Download latest release**](https://github.com/DARKSIDE957/PCfix/releases/latest) · [**Report an issue**](https://github.com/DARKSIDE957/PCfix/issues)
-
-*Beta — actively developed. Features and UI may change between releases.*
+[**Download Latest Release (v4.1)**](https://github.com/DARKSIDE957/PCfix/releases/latest) · [**All Releases**](https://github.com/DARKSIDE957/PCfix/releases) · [**Report an Issue**](https://github.com/DARKSIDE957/PCfix/issues)
 
 </div>
 
@@ -19,76 +17,76 @@
 
 ## What is PCFIX?
 
-**PCFIX** is a Windows desktop toolkit for power users who want maintenance, tuning, and troubleshooting without juggling a dozen separate utilities. A dark OLED UI wraps deep system actions: registry tweaks, service controls, network fixes, debloating, force-delete tools, and a built-in **BSOD Analyzer** with crash history and repair shortcuts.
+**PCFIX Necromancer v4.1** is a fast, self-contained native Windows toolkit designed to fix sluggish, crashed, or cluttered PCs without installing a dozen separate utilities. Wrapped in a frameless **OLED Black & Crimson** interface with instant startup and a live operation console, it gives you real Windows diagnostics, deep cleaning, system file repair, driver checks, network tuning, debloating, and crash analysis in one place.
 
-> **Run as Administrator** for full functionality. Many actions change system settings, services, or protected files.
-
----
-
-## What's new in v4.0
-
-- Redesigned **Necromancer** shell — true OLED blacks, crimson accents, grouped navigation
-- Live metric cards with usage bars on the dashboard
-- Persistent status bar and clearer page headers
-- Installer and portable builds updated for **v4.0**
+> **Administrator privileges** are requested automatically on launch so repairs like SFC, DISM, Windows Update reset, DNS switching, and service recovery work cleanly out of the box.
 
 ---
 
-## Downloads
+## Downloads (v4.1)
 
-| File | Description |
-|------|-------------|
-| [**PCFIX_Setup_v4.0.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Recommended. Installer with dependency checks, shortcuts, and Program Files install |
-| [**PCFIX_v4.0_Portable.zip**](https://github.com/DARKSIDE957/PCfix/releases/latest) | Portable. Unzip the folder and run PCFIX.exe as Administrator |
+| Download | Best For | Notes |
+|----------|----------|-------|
+| [**PCFIX_Setup_v4.1.exe**](https://github.com/DARKSIDE957/PCfix/releases/latest) | **Recommended** | Standalone single-file installer. Installs to Program Files, creates Desktop & Start Menu shortcuts, registers in Windows Apps & Features with clean Uninstall support. |
+| [**PCFIX_v4.1_Portable.zip**](https://github.com/DARKSIDE957/PCfix/releases/latest) | **USB / Portable** | Zero installation required. Extract the folder anywhere and run `PCFIX.exe`. Self-contained — no Python or extra runtimes needed. |
 
-1. Open **[Releases](https://github.com/DARKSIDE957/PCfix/releases)** and download the build you need.
-2. Run the installer, or unzip the portable folder and run `PCFIX.exe` as Administrator.
-3. Launch from the Desktop shortcut, Start Menu, or the portable `PCFIX.exe` directly.
+1. Open [**Releases**](https://github.com/DARKSIDE957/PCfix/releases/latest) and download **PCFIX_Setup_v4.1.exe** or **PCFIX_v4.1_Portable.zip**.
+2. Run the standalone installer (or unzip the portable folder and launch `PCFIX.exe`).
+3. Click **Run Smart Heal** on the Command Center to scan and fix your PC in one pass.
 
 ---
 
-## Features
+## What's New in v4.1
+
+- **Instant Native Launch** — Eliminated startup freezes and Perflib delays (`GetSystemTimes` + ReadyToRun AOT compilation) and fixed the launch crash completely.
+- **Standalone Single-File Setup Installer** — Completely rebuilt `PCFIX_Setup_v4.1.exe` with embedded payload, custom install directory picker, Desktop/Start Menu shortcuts, and full Windows Apps & Features uninstaller.
+- **11-Category Scan-First Deep Cleaner + Real RAM Trimmer** — Measures exact reclaimable space across Windows Temp, Browser Caches, DirectX/NVIDIA/AMD Shader Caches, Recycle Bin, Crash Dumps, Delivery Optimization, Update Cache, and more — plus real Win32 working-set trimming across active processes.
+- **True System Repair Suite with Live Console** — 15-point Health Diagnostic plus async streaming `sfc /scannow`, `DISM /RestoreHealth`, `DISM /StartComponentCleanup`, full Windows Update stack reset, online `chkdsk /scan`, SSD TRIM, Print Spooler reset, Microsoft Store reset, Time sync, and System Restore Point management.
+- **Drivers & Processes Monitors** — Detect Device Manager error codes (Code 10, 28, 43, etc.) with plain-English fixes, browse signed drivers, inspect top RAM consumers, and detect file-locking processes via the Windows Restart Manager API.
+- **Modern OLED Crimson Shell** — Redesigned frameless Windows 11/10 shell with `Ctrl+K` Global Quick Search, toggle switches, dark scrollbars, collapsible live console with Cancel support, real System Tray mode, and live-synced Windows Tweaks & Privacy Shield.
+
+---
+
+## Feature Overview
 
 <table>
 <tr>
 <td width="50%" valign="top">
 
-### System & performance
-- Live **CPU, RAM, disk** (and battery on laptops)
-- **Smart Scan** — one-click clean, DNS flush, RAM optimize
-- **Tweaks** — gaming, power, Explorer, telemetry, Copilot, and more
-- **Boost** — high-performance plan, GPU priority, visual tweaks
-- **Startup manager** — enable/disable boot apps
-- **Specs** — CPU, GPU, OS build, uptime; export to file
+### Fix & Diagnose
+- **15-Point Health Scan** — Services, drives, SMART status, faulty drivers, firewall, hosts/proxy hijacks, pending reboots, and crash history
+- **Deep Repairs** — Live streaming **SFC**, **DISM RestoreHealth**, **WinSxS Cleanup**, **Windows Update Reset**, **chkdsk /scan**, **SSD TRIM**, **Print Spooler**, **Store Reset**, and **Explorer Rebuild**
+- **Drivers & Devices** — Device Manager error code inspector + signed driver inventory & export
+- **BSOD Analyzer** — Stop-code diagnosis database, Event Log crash timeline, and `.dmp` minidump inspector
 
 </td>
 <td width="50%" valign="top">
 
-### Repair & recovery
-- **SFC** and **DISM** from the UI
-- **CHKDSK** scheduling and **memory diagnostic** launcher
-- **BSOD Analyzer** — event log history, bugcheck explanations, dump analysis
-- **Restore point** creation and settings export
+### Clean, Optimize & Shield
+- **Deep Cleaner** — 11 scan-first categories (Temp, Browser caches, GPU Shader caches, Thumbnails, WER/Dumps, Recycle Bin, Update cache, Prefetch, Logs)
+- **Processes & RAM** — Live memory monitor, process terminator, and real Win32 working-set trimmer
+- **Performance Boost** — Gaming Ultimate, Workstation, Quiet/Eco, and Balanced Default profiles with live power plan detection
+- **16 Windows Tweaks** — HAGS, Game Mode, Game DVR off, Raw Mouse, Win11 Classic Context Menu, Bing/Copilot off, Fast Startup off, Hibernation toggle, and more
 
 </td>
 </tr>
 <tr>
 <td valign="top">
 
-### Clean & debloat
-- Temp purge, recycle bin, Windows Update cache
-- **Debloat** — scan and remove common preinstalled apps
-- **Force Remove App** — find artifacts, quarantine-delete, restore
-- **Unlocker** — delete locked files and folders
+### Control & Debloat
+- **Debloater** — Categorized Windows 10/11 AppX bloat removal with optional all-user provisioned removal
+- **Startup & Services** — Manage Registry & Startup folder entries (disabled items stay recoverable) plus quick control over heavy Windows services
+- **File Unlocker** — Inspect which process locks a stubborn file (Restart Manager), kill lockers, force delete, or safely quarantine
+- **Force Remove App** — Scan Program Files, AppData, ProgramData, and Uninstall registry for app leftovers
 
 </td>
 <td valign="top">
 
-### Network & privacy
-- DNS presets (Cloudflare, Google, OpenDNS, DHCP restore)
-- Flush DNS, Winsock reset, adapter reset, ping tests
-- Privacy toggles and **Privacy Shield** telemetry reduction
-- Optional IP/MAC hide in the network view
+### Network & Privacy
+- **Parallel DNS Benchmark** — Ping Cloudflare, Google, Quad9, AdGuard, and OpenDNS side-by-side and apply the fastest in one click
+- **Network Stack Repair** — Flush DNS, IP lease renew, full Winsock + TCP/IP reset, listening TCP ports viewer, and IP/MAC privacy masking
+- **Privacy Shield** — 12 live-verified registry policies (Telemetry, DiagTrack, Recall AI snapshots, Ad ID, Activity History, Cloud Clipboard, God Mode)
+- **Hosts & Utilities** — Auto-backed-up hosts editor + 12 built-in Windows diagnostic launchers
 
 </td>
 </tr>
@@ -96,97 +94,10 @@
 
 ---
 
-## App modules
-
-| Section | What it does |
-|---------|----------------|
-| **Dashboard** | Live stats, Smart Scan, quick DNS/RAM/temp actions |
-| **Cleaner** | Deep cleaning toggles, services, privacy, gaming |
-| **Repair** | SFC, DISM, network stack reset, disk check |
-| **Boost** | Performance plan and GPU-oriented shortcuts |
-| **Tweaks** | Advanced registry and system optimizations |
-| **Startup** | Control programs that run at login |
-| **Specs** | Hardware and OS information |
-| **Tools** | DNS switcher, hosts, firewall helpers |
-| **Network** | Adapters, DNS, latency, privacy display |
-| **Privacy** | Telemetry and tracking-related controls |
-| **Debloat** | Remove bundled Windows apps |
-| **Unlocker** | Force-delete stubborn files |
-| **Force Remove** | Hunt and remove leftover app data |
-| **BSOD Analyzer** | Crashes, insights, dumps, export report |
-| **Settings** | Tray minimize, startup sound, auto RAM optimize |
-
----
-
 ## Requirements
 
-| Requirement | Notes |
-|-------------|--------|
-| **OS** | Windows 10 or 11 (64-bit) |
-| **Privileges** | Administrator for most features |
-| **VC++ Redistributable (x64)** | Installer can download if missing |
-| **.NET Framework 4.8** | Installer can download if missing |
-| **WebView2 Runtime (x64)** | Installer can download if missing |
-
----
-
-## Troubleshooting
-
-<details>
-<summary><strong>App won’t start</strong></summary>
-
-- Install **VC++ x64**, **.NET 4.8**, and **WebView2**, then retry.
-- Right-click the `.exe` → **Run as administrator**.
-- Check `%LOCALAPPDATA%\PCFIX\pcfix.log` for errors.
-
-</details>
-
-<details>
-<summary><strong>Tweaks didn’t apply</strong></summary>
-
-- Reboot after registry or service changes.
-- Confirm antivirus or Group Policy isn’t blocking edits.
-
-</details>
-
-<details>
-<summary><strong>BSOD tools show nothing</strong></summary>
-
-- Run as Administrator.
-- You need a recent crash in the System log (Event ID 1001) or a `.dmp` file for advanced analysis.
-
-</details>
-
----
-
-## Uninstall
-
-1. Close PCFIX (exit from tray if minimized).
-2. Delete `C:\Program Files\PCFIX` (or your custom install folder).
-3. Remove Desktop and Start Menu shortcuts.
-4. Optional: delete registry key `HKCU\Software\PCFIX`.
-5. Optional: delete `%LOCALAPPDATA%\PCFIX` for logs and config.
-
----
-
-## Disclaimer
-
-PCFIX can modify system settings, services, registry, and files. **You are responsible for your machine.** Back up important data and create a restore point before applying aggressive tweaks.
-
----
-
-## License
-
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE).
-
----
-
-<div align="center">
-
-**PCFIX NECROMANCER v4.0** · Made for Windows power users
-
-[Star this repo](https://github.com/DARKSIDE957/PCfix) if it helped you
-
-© 2026 PCFIX Development
-
-</div>
+| Requirement | Details |
+|-------------|---------|
+| **OS** | Windows 10 or Windows 11 (64-bit / x64) |
+| **Privileges** | Administrator (prompted automatically via UAC) |
+| **Dependencies** | **None** — self-contained native .NET 8 build |
